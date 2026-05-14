@@ -25,7 +25,7 @@
 - **结构化诊断**：`parseWithDiagnostics()` 提供 8 种分类的结构化诊断信息，按严重级别过滤。
 - **RTL 支持**：完整的从右到左文本方向支持（`\RLE`、`\LRE`、RTL/LTR 环境，支持嵌套）。
 
-## 📐 已支持的 LaTeX 功能（372+）
+## 📐 已支持的 LaTeX 功能（378+）
 
 <details>
 <summary><b>数学公式</b> — 分数、根号、二项式</summary>
@@ -126,9 +126,12 @@
 </details>
 
 <details>
-<summary><b>特殊效果与布局（9）</b></summary>
+<summary><b>特殊效果与布局（15）</b></summary>
 
 - **方框**：`\boxed{E=mc^2}`, `\fbox{text}`
+- **Menclose / enclose**：`\enclose{circle}{x}`, `\enclose{circle,box}{x}`, `\enclose{updiagonalstrike downdiagonalstrike}{x}`
+- **已支持 notation**：`box`, `roundedbox`, `circle`, `left`, `right`, `top`, `bottom`, `updiagonalstrike`, `downdiagonalstrike`, `verticalstrike`, `horizontalstrike`
+- **已支持 attributes**：`mathcolor`, `mathbackground`
 - **幻影与间距**：`\phantom`, `\smash`, `\vphantom`, `\hphantom`
 - **零宽叠加**：`\mathclap{内容}`, `\mathllap{内容}`, `\mathrlap{内容}`
 </details>
@@ -177,7 +180,7 @@
 
 ## 📸 渲染预览
 
-项目包含一个演示 App (`composeApp`/`androidApp`)，展示了各种复杂的 LaTeX 场景：
+项目包含一个演示 App (`composeApp`/`androidApp`)，展示了各种复杂的 LaTeX 场景。预览数据中也新增了独立的 `Enclose / menclose` 分组，用于展示圆圈、方框、组合边框、删除线以及颜色/背景属性效果：
 
 | 基础数学 | 化学公式 | 增量解析 |
 | :---: | :---: | :---: |

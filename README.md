@@ -25,7 +25,7 @@ A high-performance LaTeX mathematical formula parsing and rendering library deve
 - **Structured Diagnostics**: `parseWithDiagnostics()` provides 8-category structured diagnostics with severity filtering.
 - **RTL Support**: Complete right-to-left text direction support (`\RLE`, `\LRE`, RTL/LTR environments, nesting).
 
-## 📐 Supported LaTeX Features (372+)
+## 📐 Supported LaTeX Features (378+)
 
 <details>
 <summary><b>Math Formulas</b> — fractions, roots, binomials</summary>
@@ -126,9 +126,12 @@ A high-performance LaTeX mathematical formula parsing and rendering library deve
 </details>
 
 <details>
-<summary><b>Special Effects & Layout (9)</b></summary>
+<summary><b>Special Effects & Layout (15)</b></summary>
 
 - **Boxes**: `\boxed{E=mc^2}`, `\fbox{text}`
+- **Menclose / enclose**: `\enclose{circle}{x}`, `\enclose{circle,box}{x}`, `\enclose{updiagonalstrike downdiagonalstrike}{x}`
+- **Supported notations**: `box`, `roundedbox`, `circle`, `left`, `right`, `top`, `bottom`, `updiagonalstrike`, `downdiagonalstrike`, `verticalstrike`, `horizontalstrike`
+- **Supported attributes**: `mathcolor`, `mathbackground`
 - **Phantoms & spacing**: `\phantom`, `\smash`, `\vphantom`, `\hphantom`
 - **Zero-width overlaps**: `\mathclap{content}`, `\mathllap{content}`, `\mathrlap{content}`
 </details>
@@ -177,7 +180,7 @@ A high-performance LaTeX mathematical formula parsing and rendering library deve
 
 ## 📸 Rendering Preview
 
-The project includes a Demo App (`composeApp`/`androidApp`) showcasing various complex LaTeX scenarios:
+The project includes a Demo App (`composeApp`/`androidApp`) showcasing various complex LaTeX scenarios. The preview dataset also contains a dedicated `Enclose / menclose` group covering circles, boxes, combined borders, strike-throughs, and color/background attributes:
 
 | Basic Math | Chemical Formulas | Incremental Parsing |
 | :---: | :---: | :---: |

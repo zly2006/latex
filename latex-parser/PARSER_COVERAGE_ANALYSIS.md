@@ -470,9 +470,15 @@ x^{\sum_{i=1}^{n}}
 
 ### ✅ 已支持
 
-#### 方框
+#### 方框与通用 menclose 围框
 - ✅ `\boxed{E = mc^2}` 方框（在公式周围绘制矩形边框）
 - ✅ `\fbox{text}` 文本模式方框（同 `\boxed` 但使用 FBOX 样式）
+- ✅ `\enclose{circle}{x}` 通用围框/圈注（对应 MathML `<menclose>`）
+- ✅ 支持 menclose notation 子集：`box`, `roundedbox`, `circle`
+- ✅ 支持边线 notation：`left`, `right`, `top`, `bottom`
+- ✅ 支持删除线 notation：`updiagonalstrike`, `downdiagonalstrike`, `verticalstrike`, `horizontalstrike`
+- ✅ 支持组合 notation：如 `\enclose{circle,box}{x}`、`\enclose{updiagonalstrike downdiagonalstrike}{x}`
+- ✅ 支持可选 attributes 子集：`mathcolor`, `mathbackground`
 
 #### 幻影与间距控制
 - ✅ `\phantom{x}` 幻影空间（占据空间但不显示内容，用于对齐）
@@ -488,7 +494,7 @@ x^{\sum_{i=1}^{n}}
 ### ❌ 缺失
 - 无
 
-**覆盖率**: 9/9 (100%) ✅
+**覆盖率**: 15/15 (100%) ✅
 
 ---
 
@@ -558,12 +564,12 @@ x^{\sum_{i=1}^{n}}
 | 化学公式 | 13/13 | 0 | 100% |
 | 标签与引用 | 5/5 | 0 | 100% |
 | 自定义命令 | 9/9 | 0 | 100% |
-| 特殊效果与布局 | 9/9 | 0 | 100% |
+| 特殊效果与布局 | 15/15 | 0 | 100% |
 | 高级标注 | 6/6 | 0 | 100% |
 | API 与工程能力 | 13/13 | 0 | 100% |
 | 章节结构 | 6/6 | 0 | 100% |
 | RTL 文本方向 | 7/7 | 0 | 100% |
-| **总体** | **375+/375+** | **0** | **100%** |
+| **总体** | **381+/381+** | **0** | **100%** |
 
 ---
 
@@ -671,8 +677,9 @@ x^{\sum_{i=1}^{n}}
 - **范围**: 类似 `\xrightarrow` 的模式，支持上下标注的可扩展等号
 - **场景**: 推导过程中的条件等式
 
-#### ❌ 装饰符号扩展
-- **范围**: `\circled{1}` 圆圈数字、`\enclose` 圆角边框/圆圈等扩展边框样式
+#### ✅ 装饰符号扩展（已支持部分）
+- **已支持**: `\enclose` 通用 menclose 围框/边线/删除线样式，含 `roundedbox`、`circle`、组合 notation，以及 `mathcolor`/`mathbackground` 属性子集
+- **仍缺失**: `\circled{1}` 圆圈数字等独立扩展命令
 - **场景**: 教学标注、重点标记
 
 #### ❌ `\mathstrut` 最小高度保证
