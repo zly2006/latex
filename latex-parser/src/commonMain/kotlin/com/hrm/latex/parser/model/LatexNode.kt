@@ -720,6 +720,50 @@ sealed class LatexNode {
     }
 
     /**
+     * 通用围框/删除线节点（\enclose）
+     * 对应 MathML <menclose>，用于统一表示边框、圆圈、删除线等装饰。
+     *
+     * @param content 被包围的内容
+     * @param notations menclose notation 列表
+     * @param attributes 可选属性（如 mathcolor/mathbackground）
+     */
+    data class Enclose(
+        val content: List<LatexNode>,
+        val notations: List<Notation>,
+        val attributes: Map<String, String> = emptyMap(),
+        override val sourceRange: SourceRange? = null
+    ) : LatexNode() {
+        enum class Notation(val mathMlName: String) {
+            LONGDIV("longdiv"),
+            ACTUARIAL("actuarial"),
+            BOX("box"),
+            ROUNDEDBOX("roundedbox"),
+            CIRCLE("circle"),
+            LEFT("left"),
+            RIGHT("right"),
+            TOP("top"),
+            BOTTOM("bottom"),
+            UPDIAGONALSTRIKE("updiagonalstrike"),
+            DOWNDIAGONALSTRIKE("downdiagonalstrike"),
+            VERTICALSTRIKE("verticalstrike"),
+            HORIZONTALSTRIKE("horizontalstrike"),
+            MADRUWB("madruwb"),
+            UPDIAGONALARROW("updiagonalarrow"),
+            PHASORANGLE("phasorangle");
+
+            companion object {
+                fun fromMathMlName(name: String): Notation? =
+                    entries.firstOrNull { it.mathMlName == name.trim().lowercase() }
+            }
+        }
+
+        override fun children() = content
+        override fun withSourceRange(range: SourceRange) = copy(sourceRange = range)
+        override fun withChildren(newChildren: List<LatexNode>) = copy(content = newChildren)
+        override fun <T> accept(visitor: LatexVisitor<T>) = visitor.visitEnclose(this)
+    }
+
+    /**
      * 幻影节点（\phantom）
      * 占据空间但不显示内容，用于对齐
      */

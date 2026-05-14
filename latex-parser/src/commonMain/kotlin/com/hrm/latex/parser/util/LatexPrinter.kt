@@ -179,6 +179,24 @@ class LatexPrinter : BaseLatexVisitor<String>() {
         indent--
         return ""
     }
+
+    override fun visitEnclose(node: LatexNode.Enclose): String {
+        val notationText = node.notations.joinToString(",") { it.mathMlName }
+        output.append("Enclose($notationText)")
+        if (node.attributes.isNotEmpty()) {
+            output.append("(attributes=${node.attributes})")
+        }
+        output.append("\n")
+        indent++
+        printIndent()
+        output.append("content: ")
+        node.content.forEachIndexed { i, child ->
+            if (i > 0) output.append(", ")
+            visit(child)
+        }
+        indent--
+        return ""
+    }
     
     override fun visitSpace(node: LatexNode.Space): String {
         output.append("Space(${node.type})")

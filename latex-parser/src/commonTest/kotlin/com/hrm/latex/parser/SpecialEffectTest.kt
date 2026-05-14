@@ -155,6 +155,42 @@ class SpecialEffectTest {
     }
 
     @Test
+    fun should_parse_enclose_circle_box() {
+        val doc = parser.parse("\\enclose{circle,box}{x+y}")
+        val enclose = doc.children.first()
+        assertIs<LatexNode.Enclose>(enclose)
+        assertEquals(
+            listOf(LatexNode.Enclose.Notation.CIRCLE, LatexNode.Enclose.Notation.BOX),
+            enclose.notations
+        )
+        assertTrue(enclose.content.isNotEmpty())
+    }
+
+    @Test
+    fun should_parse_enclose_with_attributes() {
+        val doc = parser.parse("\\enclose{roundedbox}[mathcolor=\"red\" mathbackground=\"yellow\"]{x}")
+        val enclose = doc.children.first()
+        assertIs<LatexNode.Enclose>(enclose)
+        assertEquals(listOf(LatexNode.Enclose.Notation.ROUNDEDBOX), enclose.notations)
+        assertEquals("red", enclose.attributes["mathcolor"])
+        assertEquals("yellow", enclose.attributes["mathbackground"])
+    }
+
+    @Test
+    fun should_parse_enclose_strike_combinations() {
+        val doc = parser.parse("\\enclose{updiagonalstrike downdiagonalstrike}{x}")
+        val enclose = doc.children.first()
+        assertIs<LatexNode.Enclose>(enclose)
+        assertEquals(
+            listOf(
+                LatexNode.Enclose.Notation.UPDIAGONALSTRIKE,
+                LatexNode.Enclose.Notation.DOWNDIAGONALSTRIKE
+            ),
+            enclose.notations
+        )
+    }
+
+    @Test
     fun should_parse_boxed_in_equation() {
         val input = "y = \\boxed{mx + b}"
         val result = parser.parse(input)

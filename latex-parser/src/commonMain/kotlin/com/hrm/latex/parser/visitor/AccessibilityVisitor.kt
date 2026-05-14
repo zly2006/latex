@@ -352,6 +352,16 @@ class AccessibilityVisitor : BaseLatexVisitor<String>() {
         return "boxed: " + node.content.joinToString(" ") { visit(it) }.collapseSpaces()
     }
 
+    override fun visitEnclose(node: LatexNode.Enclose): String {
+        val content = node.content.joinToString(" ") { visit(it) }.collapseSpaces()
+        val notation = node.notations.joinToString(", ") { encloseNotationName(it) }
+        return if (notation.isBlank()) {
+            "enclosed: $content"
+        } else {
+            "enclosed with $notation: $content"
+        }
+    }
+
     override fun visitPhantom(node: LatexNode.Phantom): String = ""
 
     override fun visitNewCommand(node: LatexNode.NewCommand): String = ""
@@ -459,6 +469,27 @@ class AccessibilityVisitor : BaseLatexVisitor<String>() {
             "⌈", "\\lceil" -> "ceiling"
             "⌉", "\\rceil" -> "end ceiling"
             else -> delim
+        }
+    }
+
+    private fun encloseNotationName(notation: LatexNode.Enclose.Notation): String {
+        return when (notation) {
+            LatexNode.Enclose.Notation.LONGDIV -> "long division"
+            LatexNode.Enclose.Notation.ACTUARIAL -> "actuarial"
+            LatexNode.Enclose.Notation.BOX -> "box"
+            LatexNode.Enclose.Notation.ROUNDEDBOX -> "rounded box"
+            LatexNode.Enclose.Notation.CIRCLE -> "circle"
+            LatexNode.Enclose.Notation.LEFT -> "left line"
+            LatexNode.Enclose.Notation.RIGHT -> "right line"
+            LatexNode.Enclose.Notation.TOP -> "top line"
+            LatexNode.Enclose.Notation.BOTTOM -> "bottom line"
+            LatexNode.Enclose.Notation.UPDIAGONALSTRIKE -> "up diagonal strike"
+            LatexNode.Enclose.Notation.DOWNDIAGONALSTRIKE -> "down diagonal strike"
+            LatexNode.Enclose.Notation.VERTICALSTRIKE -> "vertical strike"
+            LatexNode.Enclose.Notation.HORIZONTALSTRIKE -> "horizontal strike"
+            LatexNode.Enclose.Notation.MADRUWB -> "madruwb"
+            LatexNode.Enclose.Notation.UPDIAGONALARROW -> "up diagonal arrow"
+            LatexNode.Enclose.Notation.PHASORANGLE -> "phasor angle"
         }
     }
 

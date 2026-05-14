@@ -26,25 +26,33 @@ import com.hrm.latex.parser.model.LatexNode
 import com.hrm.latex.parser.tokenizer.LatexToken
 
 /**
- * 特殊效果命令：\boxed, \phantom, \smash, \vphantom, \hphantom, \not
+ * 特殊效果命令：\boxed, \enclose, \phantom, \smash, \vphantom, \hphantom, \not
  */
 internal fun CommandRegistry.installSpecialEffectHandlers() {
     register("boxed") { _, ctx, _ ->
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
-        }
+        val content = unwrapContent(arg)
         LatexNode.Boxed(content)
+    }
+
+    register("enclose") { _, ctx, stream ->
+        val notationArg = ctx.parseArgument() ?: LatexNode.Text("")
+        val notationText = ParseUtils.extractColorName(notationArg)
+        val notations = parseEncloseNotations(notationText)
+
+        val attributes = parseAttributeList(parseOptionalBracketText(stream))
+
+        val arg = ctx.parseArgument() ?: LatexNode.Text("")
+        LatexNode.Enclose(
+            content = unwrapContent(arg),
+            notations = notations,
+            attributes = attributes
+        )
     }
 
     register("phantom") { _, ctx, _ ->
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
-        }
-        LatexNode.Phantom(content)
+        LatexNode.Phantom(unwrapContent(arg))
     }
 
     register("smash") { _, ctx, stream ->
@@ -71,29 +79,17 @@ internal fun CommandRegistry.installSpecialEffectHandlers() {
         }
 
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
-        }
-        LatexNode.Smash(content, smashType)
+        LatexNode.Smash(unwrapContent(arg), smashType)
     }
 
     register("vphantom") { _, ctx, _ ->
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
-        }
-        LatexNode.VPhantom(content)
+        LatexNode.VPhantom(unwrapContent(arg))
     }
 
     register("hphantom") { _, ctx, _ ->
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
-        }
-        LatexNode.HPhantom(content)
+        LatexNode.HPhantom(unwrapContent(arg))
     }
 
     // 否定修饰 \not
@@ -109,40 +105,74 @@ internal fun CommandRegistry.installSpecialEffectHandlers() {
     // \fbox — 文本模式方框，行为同 \boxed 但使用 FBOX 样式
     register("fbox") { _, ctx, _ ->
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
-        }
-        LatexNode.Boxed(content, LatexNode.Boxed.BoxStyle.FBOX)
+        LatexNode.Boxed(unwrapContent(arg), LatexNode.Boxed.BoxStyle.FBOX)
     }
 
     // \mathclap — 零宽居中叠加
     register("mathclap") { _, ctx, _ ->
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
-        }
-        LatexNode.MathLap(content, LatexNode.MathLap.LapType.CLAP)
+        LatexNode.MathLap(unwrapContent(arg), LatexNode.MathLap.LapType.CLAP)
     }
 
     // \mathllap — 零宽左叠加（内容向左扩展）
     register("mathllap") { _, ctx, _ ->
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
-        }
-        LatexNode.MathLap(content, LatexNode.MathLap.LapType.LLAP)
+        LatexNode.MathLap(unwrapContent(arg), LatexNode.MathLap.LapType.LLAP)
     }
 
     // \mathrlap — 零宽右叠加（内容向右扩展）
     register("mathrlap") { _, ctx, _ ->
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
-        val content = when (arg) {
-            is LatexNode.Group -> arg.children
-            else -> listOf(arg)
+        LatexNode.MathLap(unwrapContent(arg), LatexNode.MathLap.LapType.RLAP)
+    }
+}
+
+private fun unwrapContent(arg: LatexNode): List<LatexNode> {
+    return when (arg) {
+        is LatexNode.Group -> arg.children
+        else -> listOf(arg)
+    }
+}
+
+private fun parseOptionalBracketText(stream: com.hrm.latex.parser.component.LatexTokenStream): String? {
+    if (stream.peek() !is LatexToken.LeftBracket) return null
+    stream.advance()
+    val builder = StringBuilder()
+    while (!stream.isEOF() && stream.peek() !is LatexToken.RightBracket) {
+        val token = stream.peek()
+        when (token) {
+            is LatexToken.Text -> builder.append(token.content)
+            is LatexToken.Command -> builder.append("\\").append(token.name)
+            is LatexToken.Whitespace -> builder.append(token.content)
+            is LatexToken.LeftBrace -> builder.append("{")
+            is LatexToken.RightBrace -> builder.append("}")
+            is LatexToken.LeftBracket -> builder.append("[")
+            is LatexToken.RightBracket -> builder.append("]")
+            is LatexToken.Superscript -> builder.append("^")
+            is LatexToken.Subscript -> builder.append("_")
+            is LatexToken.Ampersand -> builder.append("&")
+            is LatexToken.NewLine -> builder.append("\\\\")
+            is LatexToken.MathShift -> builder.append("$".repeat(token.count))
+            else -> Unit
         }
-        LatexNode.MathLap(content, LatexNode.MathLap.LapType.RLAP)
+        stream.advance()
+    }
+    if (stream.peek() is LatexToken.RightBracket) {
+        stream.advance()
+    }
+    return builder.toString().trim().ifEmpty { null }
+}
+
+private fun parseEncloseNotations(text: String): List<LatexNode.Enclose.Notation> {
+    return text.split(',', ' ')
+        .mapNotNull { LatexNode.Enclose.Notation.fromMathMlName(it) }
+        .distinct()
+}
+
+private fun parseAttributeList(raw: String?): Map<String, String> {
+    if (raw.isNullOrBlank()) return emptyMap()
+    val regex = Regex("""([A-Za-z][A-Za-z0-9_-]*)\s*=\s*"([^"]*)"""")
+    return regex.findAll(raw).associate { match ->
+        match.groupValues[1] to match.groupValues[2]
     }
 }

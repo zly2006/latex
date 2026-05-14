@@ -228,6 +228,15 @@ class MathMLVisitorTest {
     }
 
     @Test
+    fun testEnclose() {
+        val doc = parser.parse("\\enclose{circle,box}[mathcolor=\"red\"]{x}")
+        val result = MathMLVisitor.convert(doc)
+        assertTrue(result.contains("<menclose"))
+        assertTrue(result.contains("notation=\"circle box\""))
+        assertTrue(result.contains("mathcolor=\"red\""))
+    }
+
+    @Test
     fun testPhantom() {
         val doc = parser.parse("\\phantom{x}")
         val result = MathMLVisitor.convert(doc)

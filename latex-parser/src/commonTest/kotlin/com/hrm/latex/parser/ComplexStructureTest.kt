@@ -152,6 +152,19 @@ class ComplexStructureTest {
         val liminf = doc.children[0] as LatexNode.BigOperator
         assertEquals("liminf", liminf.operator)
     }
+
+    @Test
+    fun testEncloseNestedStructure() {
+        val doc = parser.parse("\\enclose{circle,box}[mathcolor=\"blue\"]{\\frac{a+b}{c}}")
+        assertTrue(doc.children[0] is LatexNode.Enclose)
+        val enclose = doc.children[0] as LatexNode.Enclose
+        assertEquals(
+            listOf(LatexNode.Enclose.Notation.CIRCLE, LatexNode.Enclose.Notation.BOX),
+            enclose.notations
+        )
+        assertEquals("blue", enclose.attributes["mathcolor"])
+        assertTrue(enclose.content.any { it is LatexNode.Fraction })
+    }
     
     // ========== 矩阵测试 ==========
     

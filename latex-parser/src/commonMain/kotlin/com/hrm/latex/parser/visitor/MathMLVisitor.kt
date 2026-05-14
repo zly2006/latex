@@ -212,9 +212,15 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
             LatexNode.Accent.AccentType.WIDEHAT -> "<mover>$content<mo>^</mo></mover>"
             LatexNode.Accent.AccentType.OVERRIGHTARROW -> "<mover>$content<mo>→</mo></mover>"
             LatexNode.Accent.AccentType.OVERLEFTARROW -> "<mover>$content<mo>←</mo></mover>"
-            LatexNode.Accent.AccentType.CANCEL -> "<menclose notation=\"updiagonalstrike\">$content</menclose>"
-            LatexNode.Accent.AccentType.BCANCEL -> "<menclose notation=\"downdiagonalstrike\">$content</menclose>"
-            LatexNode.Accent.AccentType.XCANCEL -> "<menclose notation=\"updiagonalstrike downdiagonalstrike\">$content</menclose>"
+            LatexNode.Accent.AccentType.CANCEL -> renderMenclose(content, listOf(LatexNode.Enclose.Notation.UPDIAGONALSTRIKE))
+            LatexNode.Accent.AccentType.BCANCEL -> renderMenclose(content, listOf(LatexNode.Enclose.Notation.DOWNDIAGONALSTRIKE))
+            LatexNode.Accent.AccentType.XCANCEL -> renderMenclose(
+                content,
+                listOf(
+                    LatexNode.Enclose.Notation.UPDIAGONALSTRIKE,
+                    LatexNode.Enclose.Notation.DOWNDIAGONALSTRIKE
+                )
+            )
             LatexNode.Accent.AccentType.DDDOT -> "<mover>$content<mo>\u20DB</mo></mover>"
             LatexNode.Accent.AccentType.GRAVE -> "<mover>$content<mo>`</mo></mover>"
             LatexNode.Accent.AccentType.ACUTE -> "<mover>$content<mo>´</mo></mover>"
@@ -345,7 +351,7 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
     }
 
     override fun visitNegation(node: LatexNode.Negation): String {
-        return "<menclose notation=\"updiagonalstrike\">${visit(node.content)}</menclose>"
+        return renderMenclose(visit(node.content), listOf(LatexNode.Enclose.Notation.UPDIAGONALSTRIKE))
     }
 
     override fun visitTag(node: LatexNode.Tag): String {
@@ -440,7 +446,12 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
 
     override fun visitBoxed(node: LatexNode.Boxed): String {
         val content = node.content.joinToString("") { visit(it) }
-        return "<menclose notation=\"box\">$content</menclose>"
+        return renderMenclose(content, listOf(LatexNode.Enclose.Notation.BOX))
+    }
+
+    override fun visitEnclose(node: LatexNode.Enclose): String {
+        val content = node.content.joinToString("") { visit(it) }
+        return renderMenclose(content, node.notations, node.attributes)
     }
 
     override fun visitPhantom(node: LatexNode.Phantom): String {
@@ -519,6 +530,22 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
     // ========== 辅助方法 ==========
 
     private fun mrow(content: String): String = "<mrow>$content</mrow>"
+
+    private fun renderMenclose(
+        content: String,
+        notations: List<LatexNode.Enclose.Notation>,
+        attributes: Map<String, String> = emptyMap()
+    ): String {
+        val notationAttr = if (notations.isEmpty()) {
+            LatexNode.Enclose.Notation.LONGDIV.mathMlName
+        } else {
+            notations.joinToString(" ") { it.mathMlName }
+        }
+        val extraAttrs = attributes.entries.joinToString("") { (key, value) ->
+            " ${escapeXml(key)}=\"${escapeXml(value)}\""
+        }
+        return "<menclose notation=\"$notationAttr\"$extraAttrs>$content</menclose>"
+    }
 
     private fun buildTable(rows: List<List<LatexNode>>): String {
         val sb = StringBuilder("<mtable>")

@@ -64,6 +64,7 @@ interface LatexVisitor<T> {
     fun visitBinomial(node: LatexNode.Binomial): T
     fun visitTextMode(node: LatexNode.TextMode): T
     fun visitBoxed(node: LatexNode.Boxed): T
+    fun visitEnclose(node: LatexNode.Enclose): T
     fun visitPhantom(node: LatexNode.Phantom): T
     fun visitNewCommand(node: LatexNode.NewCommand): T
     fun visitNegation(node: LatexNode.Negation): T
@@ -275,6 +276,11 @@ abstract class BaseLatexVisitor<T> : LatexVisitor<T> {
         return defaultVisit(node)
     }
 
+    override fun visitEnclose(node: LatexNode.Enclose): T {
+        node.content.forEach { visit(it) }
+        return defaultVisit(node)
+    }
+
     override fun visitPhantom(node: LatexNode.Phantom): T {
         node.content.forEach { visit(it) }
         return defaultVisit(node)
@@ -482,6 +488,7 @@ abstract class SimpleLatexVisitor<T> : LatexVisitor<T> {
     override fun visitBinomial(node: LatexNode.Binomial): T = visitChildren(node)
     override fun visitTextMode(node: LatexNode.TextMode): T = visitChildren(node)
     override fun visitBoxed(node: LatexNode.Boxed): T = visitChildren(node)
+    override fun visitEnclose(node: LatexNode.Enclose): T = visitChildren(node)
     override fun visitPhantom(node: LatexNode.Phantom): T = visitChildren(node)
     override fun visitNewCommand(node: LatexNode.NewCommand): T = visitChildren(node)
     override fun visitNegation(node: LatexNode.Negation): T = visitChildren(node)

@@ -500,8 +500,22 @@ val basicLatexPreviewGroups = listOf(
         )
     ),
     PreviewGroup(
+        id = "enclose_menclose",
+        title = "12. Enclose / menclose",
+        description = "通用 menclose 围框、圆圈、组合边框与删除线，以及 mathcolor/mathbackground 属性",
+        items = listOf(
+            PreviewItem("1", "circle 圆圈", "\\enclose{circle}{x}"),
+            PreviewItem("2", "box 方框", "\\enclose{box}{x+y}"),
+            PreviewItem("3", "roundedbox + mathcolor", "\\enclose{roundedbox}[mathcolor=\"red\"]{\\frac{a}{b}}"),
+            PreviewItem("4", "circle + box + background", "\\enclose{circle,box}[mathbackground=\"yellow\"]{x}"),
+            PreviewItem("5", "双对角删除线", "\\enclose{updiagonalstrike downdiagonalstrike}{x}"),
+            PreviewItem("6", "边框组合", "\\enclose{left,right,top,bottom}{a+b=c}"),
+            PreviewItem("7", "水平/垂直删除线", "\\enclose{horizontalstrike verticalstrike}{T}"),
+        )
+    ),
+    PreviewGroup(
         id = "labels_refs",
-        title = "12. 标签、引用与编号",
+        title = "13. 标签、引用与编号",
         description = "公式编号（tag）、标签引用（label/ref/eqref）、equation 自动编号",
         items = listOf(
             PreviewItem("1", "公式编号 tag", "E = mc^2 \\tag{1}"),
@@ -517,7 +531,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "advanced_annotations",
-        title = "13. 高级标注",
+        title = "14. 高级标注",
         description = "sideset 四角标、tensor 张量、prescript 前置上下标、零宽叠放",
         items = listOf(
             PreviewItem("1", "sideset 四角", "\\sideset{_a^b}{_c^d}{\\sum}"),
@@ -534,7 +548,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "hyperlinks_api",
-        title = "14. 超链接、高亮与诊断",
+        title = "15. 超链接、高亮与诊断",
         description = "超链接（href/url）、子表达式高亮、错误指示、注释、不断开空格",
         items = listOf(
             PreviewItem("1", "href 超链接", "\\href{https://example.com}{点击这里}"),
@@ -625,7 +639,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "custom_commands",
-        title = "15. 自定义命令",
+        title = "16. 自定义命令",
         description = "newcommand 定义和使用",
         items = listOf(
             PreviewItem("1", "无参数命令", "\\newcommand{\\R}{\\mathbb{R}} x \\in \\R"),
@@ -706,7 +720,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "spaces",
-        title = "16. 间距专题",
+        title = "17. 间距专题",
         description = "负空格、自定义空格、水平间距",
         items = listOf(
             PreviewItem("1", "标准空格对比", "a \\, b \\: c \\; d \\quad e \\qquad f"),
@@ -719,7 +733,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "mathstyle",
-        title = "17. 数学模式切换",
+        title = "18. 数学模式切换",
         description = "displaystyle, textstyle, scriptstyle, scriptscriptstyle",
         items = listOf(
             PreviewItem(
@@ -771,7 +785,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "environments",
-        title = "18. 环境专题",
+        title = "19. 环境专题",
         description = "split、multline、eqnarray、subequations、cases 环境",
         items = listOf(
             PreviewItem("1", "split 基础", "\\begin{split} x &= a + b \\\\ &= c \\end{split}"),
@@ -902,7 +916,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "ams_relations",
-        title = "19. AMS 符号",
+        title = "20. AMS 符号",
         description = "AMS 符号",
         items = listOf(
             PreviewItem("1", "否定不等式", "a \\nleq b \\quad c \\ngeq d"),
@@ -1033,7 +1047,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "math_mode",
-        title = "20. 数学模式切换",
+        title = "21. 数学模式切换",
         description = "\$...\$ 行内数学，\$\$...\$\$ 和 \\[...\\] 展示数学",
         items = listOf(
             PreviewItem("1", "行内数学", "The formula \$E=mc^2\$ is famous"),
@@ -1058,7 +1072,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "animated",
-        title = "21. 动画过渡",
+        title = "22. 动画过渡",
         description = "AnimatedLatex 公式切换动画",
         items = listOf(
             PreviewItem(
@@ -1181,7 +1195,7 @@ val basicLatexPreviewGroups = listOf(
     ),
     PreviewGroup(
         id = "section_headings",
-        title = "22. 章节标题",
+        title = "23. 章节标题",
         description = "section, subsection, subsubsection, paragraph, subparagraph",
         items = listOf(
             PreviewItem("1", "section", "\\section{Introduction}"),
