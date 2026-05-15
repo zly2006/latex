@@ -36,7 +36,7 @@
 <details>
 <summary><b>符号系统（130+）</b> — 希腊字母、运算符、箭头、AMS 符号</summary>
 
-- **希腊字母**：全部小写 (α–ω)、大写 (Γ–Ω) 及变体 (ε/ϵ, θ/ϑ, φ/ϕ 等)
+- **希腊字母**：全部小写 (α–ω，含 `\omicron`)、大写 (Γ–Ω)、KaTeX 风格大写别名（如 `\Alpha`、`\Beta`、`\Epsilon`、`\Omicron`）及变体 (ε/ϵ, θ/ϑ, φ/ϕ, `\varGamma`–`\varOmega` 等)
 - **运算符**：`+`, `-`, `\times`, `\div`, `\pm`, `\mp`, `\cdot`, `\oplus`, `\otimes` 等
 - **关系符**：`=`, `\neq`, `<`, `>`, `\leq`, `\geq`, `\approx`, `\equiv`, `\sim`, `\ll`, `\gg` 等
 - **集合论**：`\in`, `\notin`, `\subset`, `\cup`, `\cap`, `\emptyset`, `\mathbb{R}` 等

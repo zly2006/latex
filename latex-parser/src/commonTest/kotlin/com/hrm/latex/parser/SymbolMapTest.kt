@@ -49,6 +49,7 @@ class SymbolMapTest {
         assertEquals("μ", SymbolMap.getSymbol("mu"))
         assertEquals("ν", SymbolMap.getSymbol("nu"))
         assertEquals("ξ", SymbolMap.getSymbol("xi"))
+        assertEquals("ο", SymbolMap.getSymbol("omicron"))
         assertEquals("π", SymbolMap.getSymbol("pi"))
         assertEquals("ρ", SymbolMap.getSymbol("rho"))
         assertEquals("σ", SymbolMap.getSymbol("sigma"))
@@ -100,6 +101,21 @@ class SymbolMapTest {
         assertEquals("ϱ", SymbolMap.getSymbol("varrho"))
         assertEquals("ς", SymbolMap.getSymbol("varsigma"))
         assertEquals("φ", SymbolMap.getSymbol("varphi"))
+    }
+
+    @Test
+    fun testVariantUppercaseGreekLetters() {
+        assertEquals("Γ", SymbolMap.getSymbol("varGamma"))
+        assertEquals("Δ", SymbolMap.getSymbol("varDelta"))
+        assertEquals("Θ", SymbolMap.getSymbol("varTheta"))
+        assertEquals("Λ", SymbolMap.getSymbol("varLambda"))
+        assertEquals("Ξ", SymbolMap.getSymbol("varXi"))
+        assertEquals("Π", SymbolMap.getSymbol("varPi"))
+        assertEquals("Σ", SymbolMap.getSymbol("varSigma"))
+        assertEquals("Υ", SymbolMap.getSymbol("varUpsilon"))
+        assertEquals("Φ", SymbolMap.getSymbol("varPhi"))
+        assertEquals("Ψ", SymbolMap.getSymbol("varPsi"))
+        assertEquals("Ω", SymbolMap.getSymbol("varOmega"))
     }
 
     // ========== 运算符测试 ==========

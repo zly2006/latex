@@ -969,6 +969,16 @@ val basicLatexPreviewGroups = listOf(
             PreviewItem("20", "正比符号", "a \\propto b \\quad c \\varpropto d"),
             PreviewItem("21", "AMS 希腊变体", "\\digamma \\quad \\varkappa"),
             PreviewItem(
+                "21a",
+                "KaTeX 大写希腊别名",
+                "\\Alpha \\quad \\Beta \\quad \\Epsilon \\quad \\Zeta \\quad \\Eta \\quad \\Iota \\quad \\Kappa \\quad \\Mu \\quad \\Nu \\quad \\Omicron \\quad \\Rho \\quad \\Tau \\quad \\Chi"
+            ),
+            PreviewItem(
+                "21b",
+                "KaTeX var 大写希腊",
+                "\\varGamma \\quad \\varDelta \\quad \\varTheta \\quad \\varLambda \\quad \\varXi \\quad \\varPi \\quad \\varSigma \\quad \\varUpsilon \\quad \\varPhi \\quad \\varPsi \\quad \\varOmega"
+            ),
+            PreviewItem(
                 "22",
                 "AMS 二元运算符 (1)",
                 "\\dotplus \\quad \\smallsetminus \\quad \\barwedge \\quad \\veebar \\quad \\doublebarwedge"
