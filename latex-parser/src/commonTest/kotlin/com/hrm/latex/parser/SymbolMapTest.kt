@@ -76,6 +76,23 @@ class SymbolMapTest {
     }
 
     @Test
+    fun testUppercaseGreekAliasesWithLatinGlyphs() {
+        assertEquals("A", SymbolMap.getSymbol("Alpha"))
+        assertEquals("B", SymbolMap.getSymbol("Beta"))
+        assertEquals("E", SymbolMap.getSymbol("Epsilon"))
+        assertEquals("Z", SymbolMap.getSymbol("Zeta"))
+        assertEquals("H", SymbolMap.getSymbol("Eta"))
+        assertEquals("I", SymbolMap.getSymbol("Iota"))
+        assertEquals("K", SymbolMap.getSymbol("Kappa"))
+        assertEquals("M", SymbolMap.getSymbol("Mu"))
+        assertEquals("N", SymbolMap.getSymbol("Nu"))
+        assertEquals("O", SymbolMap.getSymbol("Omicron"))
+        assertEquals("P", SymbolMap.getSymbol("Rho"))
+        assertEquals("T", SymbolMap.getSymbol("Tau"))
+        assertEquals("X", SymbolMap.getSymbol("Chi"))
+    }
+
+    @Test
     fun testVariantGreekLetters() {
         assertEquals("ε", SymbolMap.getSymbol("varepsilon"))
         assertEquals("ϑ", SymbolMap.getSymbol("vartheta"))

@@ -198,6 +198,7 @@ internal class TextContentMeasurer : NodeMeasurer {
         var resolvedStyle = if (context.fontStyle == null) {
             when {
                 isLowercaseGreek(node.symbol) -> context.copy(fontStyle = FontStyle.Italic)
+                isVarUppercaseGreek(node.symbol) -> context.copy(fontStyle = FontStyle.Italic)
                 isUppercaseGreek(node.symbol) -> context.copy(fontStyle = FontStyle.Normal)
                 else -> context
             }
@@ -281,6 +282,10 @@ internal class TextContentMeasurer : NodeMeasurer {
         return symbol in UPPERCASE_GREEK_SYMBOLS
     }
 
+    private fun isVarUppercaseGreek(symbol: String): Boolean {
+        return symbol in VAR_UPPERCASE_GREEK_SYMBOLS
+    }
+
     /**
      * 判断符号是否需要使用极细字重（FontWeight.ExtraLight）
      * 某些符号（如 ℏ, ∇, ∂）在正常字重下笔画过粗，需要使用极细字重
@@ -300,8 +305,15 @@ internal class TextContentMeasurer : NodeMeasurer {
 
         /** 大写希腊字母命令名集合 */
         private val UPPERCASE_GREEK_SYMBOLS = setOf(
-            "Gamma", "Delta", "Theta", "Lambda", "Xi",
-            "Pi", "Sigma", "Upsilon", "Phi", "Psi", "Omega"
+            "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa",
+            "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi",
+            "Chi", "Psi", "Omega"
+        )
+
+        /** 大写希腊字母斜体变量变体命令名集合 */
+        private val VAR_UPPERCASE_GREEK_SYMBOLS = setOf(
+            "varGamma", "varDelta", "varTheta", "varLambda", "varXi",
+            "varPi", "varSigma", "varUpsilon", "varPhi", "varPsi", "varOmega"
         )
 
         /** 需要极细字重的符号 */
