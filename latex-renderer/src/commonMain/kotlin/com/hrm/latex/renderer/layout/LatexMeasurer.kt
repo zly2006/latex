@@ -50,6 +50,7 @@ import com.hrm.latex.renderer.layout.measurer.TextContentMeasurer
 import com.hrm.latex.renderer.model.MathStyle
 import com.hrm.latex.renderer.model.RenderContext
 import com.hrm.latex.renderer.model.TextDirection
+import com.hrm.latex.renderer.model.applyFontSize
 import com.hrm.latex.renderer.model.applyMathStyle
 import com.hrm.latex.renderer.model.applyStyle
 import com.hrm.latex.renderer.model.textStyle
@@ -177,6 +178,10 @@ internal fun measureNode(
 
         is LatexNode.MathStyle -> measureGroup(
             node.content, context.applyMathStyle(node.mathStyleType), measurer, density, cache = cache
+        )
+
+        is LatexNode.FontSize -> measureGroup(
+            node.content, context.applyFontSize(node.sizeType), measurer, density, cache = cache
         )
 
         is LatexNode.Environment -> {

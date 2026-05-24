@@ -89,6 +89,12 @@ A high-performance LaTeX mathematical formula parsing and rendering library deve
 </details>
 
 <details>
+<summary><b>Font Sizes (10)</b></summary>
+
+`\tiny`, `\scriptsize`, `\footnotesize`, `\small`, `\normalsize`, `\large`, `\Large`, `\LARGE`, `\huge`, `\Huge`
+</details>
+
+<details>
 <summary><b>Math Mode Switching</b></summary>
 
 `\displaystyle`, `\textstyle`, `\scriptstyle`, `\scriptscriptstyle`, `$...$` (inline), `$$...$$` (display)

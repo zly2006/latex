@@ -271,11 +271,13 @@
 - ✅ `\symit{x}` Unicode 数学斜体
 - ✅ `\symsf{x}` Unicode 数学无衬线体
 - ✅ `\symrm{x}` Unicode 数学罗马体
+- ✅ `\tiny` / `\scriptsize` / `\footnotesize` / `\small` / `\normalsize`
+- ✅ `\large` / `\Large` / `\LARGE` / `\huge` / `\Huge`
 
 ### ❌ 缺失
 - 无
 
-**覆盖率**: 17/17 (100%) ✅
+**覆盖率**: 27/27 (100%) ✅
 
 ---
 

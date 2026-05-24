@@ -54,6 +54,7 @@ interface LatexVisitor<T> {
     fun visitStyle(node: LatexNode.Style): T
     fun visitColor(node: LatexNode.Color): T
     fun visitMathStyle(node: LatexNode.MathStyle): T
+    fun visitFontSize(node: LatexNode.FontSize): T
     fun visitBigOperator(node: LatexNode.BigOperator): T
     fun visitAligned(node: LatexNode.Aligned): T
     fun visitCases(node: LatexNode.Cases): T
@@ -214,6 +215,11 @@ abstract class BaseLatexVisitor<T> : LatexVisitor<T> {
     }
     
     override fun visitMathStyle(node: LatexNode.MathStyle): T {
+        node.content.forEach { visit(it) }
+        return defaultVisit(node)
+    }
+
+    override fun visitFontSize(node: LatexNode.FontSize): T {
         node.content.forEach { visit(it) }
         return defaultVisit(node)
     }
@@ -478,6 +484,7 @@ abstract class SimpleLatexVisitor<T> : LatexVisitor<T> {
     override fun visitStyle(node: LatexNode.Style): T = visitChildren(node)
     override fun visitColor(node: LatexNode.Color): T = visitChildren(node)
     override fun visitMathStyle(node: LatexNode.MathStyle): T = visitChildren(node)
+    override fun visitFontSize(node: LatexNode.FontSize): T = visitChildren(node)
     override fun visitBigOperator(node: LatexNode.BigOperator): T = visitChildren(node)
     override fun visitAligned(node: LatexNode.Aligned): T = visitChildren(node)
     override fun visitCases(node: LatexNode.Cases): T = visitChildren(node)

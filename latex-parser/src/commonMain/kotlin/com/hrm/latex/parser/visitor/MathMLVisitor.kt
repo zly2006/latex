@@ -304,6 +304,23 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
         return "<mstyle$display>$content</mstyle>"
     }
 
+    override fun visitFontSize(node: LatexNode.FontSize): String {
+        val content = node.content.joinToString("") { visit(it) }
+        val size = when (node.sizeType) {
+            LatexNode.FontSize.SizeType.TINY -> "50%"
+            LatexNode.FontSize.SizeType.SCRIPT_SIZE -> "70%"
+            LatexNode.FontSize.SizeType.FOOTNOTE_SIZE -> "80%"
+            LatexNode.FontSize.SizeType.SMALL -> "90%"
+            LatexNode.FontSize.SizeType.NORMAL_SIZE -> "100%"
+            LatexNode.FontSize.SizeType.LARGE -> "120%"
+            LatexNode.FontSize.SizeType.LARGE_2 -> "144%"
+            LatexNode.FontSize.SizeType.LARGE_3 -> "173%"
+            LatexNode.FontSize.SizeType.HUGE -> "207%"
+            LatexNode.FontSize.SizeType.HUGE_2 -> "249%"
+        }
+        return "<mstyle mathsize=\"$size\">$content</mstyle>"
+    }
+
     override fun visitBigOperator(node: LatexNode.BigOperator): String {
         val op = "<mo>${escapeXml(node.operator)}</mo>"
         val sub = node.subscript?.let { visit(it) }

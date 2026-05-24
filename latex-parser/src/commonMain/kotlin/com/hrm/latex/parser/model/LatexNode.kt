@@ -536,6 +536,28 @@ sealed class LatexNode {
     }
 
     /**
+     * 字号节点
+     *
+     * @property content 内容
+     * @property sizeType 字号类型
+     */
+    data class FontSize(
+        val content: List<LatexNode>,
+        val sizeType: SizeType,
+        override val sourceRange: SourceRange? = null
+    ) : LatexNode() {
+        enum class SizeType {
+            TINY, SCRIPT_SIZE, FOOTNOTE_SIZE, SMALL, NORMAL_SIZE,
+            LARGE, LARGE_2, LARGE_3, HUGE, HUGE_2
+        }
+
+        override fun children() = content
+        override fun withSourceRange(range: SourceRange) = copy(sourceRange = range)
+        override fun withChildren(newChildren: List<LatexNode>) = copy(content = newChildren)
+        override fun <T> accept(visitor: LatexVisitor<T>) = visitor.visitFontSize(this)
+    }
+
+    /**
      * 大型运算符（求和、积分、乘积等）
      */
     data class BigOperator(

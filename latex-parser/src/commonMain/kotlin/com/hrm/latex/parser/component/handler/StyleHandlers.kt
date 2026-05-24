@@ -23,6 +23,7 @@
 package com.hrm.latex.parser.component.handler
 
 import com.hrm.latex.parser.model.LatexNode
+import com.hrm.latex.parser.tokenizer.LatexToken
 
 /**
  * 字体样式 & 数学模式切换命令
@@ -89,6 +90,30 @@ internal fun CommandRegistry.installStyleHandlers() {
                 if (content != null) listOf(content) else emptyList(),
                 mathStyleType
             )
+        }
+    }
+
+    val fontSizeMapping = mapOf(
+        "tiny" to LatexNode.FontSize.SizeType.TINY,
+        "scriptsize" to LatexNode.FontSize.SizeType.SCRIPT_SIZE,
+        "footnotesize" to LatexNode.FontSize.SizeType.FOOTNOTE_SIZE,
+        "small" to LatexNode.FontSize.SizeType.SMALL,
+        "normalsize" to LatexNode.FontSize.SizeType.NORMAL_SIZE,
+        "large" to LatexNode.FontSize.SizeType.LARGE,
+        "Large" to LatexNode.FontSize.SizeType.LARGE_2,
+        "LARGE" to LatexNode.FontSize.SizeType.LARGE_3,
+        "huge" to LatexNode.FontSize.SizeType.HUGE,
+        "Huge" to LatexNode.FontSize.SizeType.HUGE_2,
+    )
+
+    for ((cmd, sizeType) in fontSizeMapping) {
+        register(cmd) { _, ctx, stream ->
+            val content = if (stream.peek() is LatexToken.LeftBrace) {
+                listOfNotNull(ctx.parseArgument())
+            } else {
+                emptyList()
+            }
+            LatexNode.FontSize(content, sizeType)
         }
     }
 

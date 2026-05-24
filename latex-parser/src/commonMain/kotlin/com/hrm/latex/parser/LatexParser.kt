@@ -118,7 +118,7 @@ internal class ParseSession(
         }
 
         val document = LatexNode.Document(
-            children,
+            applyFontSizeDeclarations(children),
             sourceRange = SourceRange(0, inputLength)
         )
         HLog.d(TAG) { "解析成功，生成 ${children.size} 个节点, 诊断: ${diagnostics.size} 条" }
@@ -247,7 +247,7 @@ internal class ParseSession(
         if (!tokenStream.isEOF()) {
             tokenStream.expect("}")
         }
-        return LatexNode.Group(children, sourceRange = tokenStream.rangeFrom(startOffset))
+        return LatexNode.Group(applyFontSizeDeclarations(children), sourceRange = tokenStream.rangeFrom(startOffset))
     }
 
     override fun parseArgument(): LatexNode? {
@@ -279,10 +279,11 @@ internal class ParseSession(
         }
 
         val range = tokenStream.rangeFrom(startOffset)
+        val normalizedChildren = applyFontSizeDeclarations(children)
         return if (count == 2) {
-            LatexNode.DisplayMath(children, sourceRange = range)
+            LatexNode.DisplayMath(normalizedChildren, sourceRange = range)
         } else {
-            LatexNode.InlineMath(children, sourceRange = range)
+            LatexNode.InlineMath(normalizedChildren, sourceRange = range)
         }
     }
 
@@ -291,5 +292,33 @@ internal class ParseSession(
             is LatexToken.LeftBrace -> parseGroup()
             else -> parseFactor() ?: LatexNode.Text("")
         }
+    }
+
+    private fun applyFontSizeDeclarations(nodes: List<LatexNode>): List<LatexNode> {
+        if (nodes.none { it is LatexNode.FontSize && it.content.isEmpty() }) return nodes
+
+        val result = mutableListOf<LatexNode>()
+        var index = 0
+        while (index < nodes.size) {
+            val node = nodes[index]
+            if (node is LatexNode.FontSize && node.content.isEmpty()) {
+                val content = mutableListOf<LatexNode>()
+                index++
+                while (index < nodes.size && nodes[index] is LatexNode.Space) {
+                    index++
+                }
+                while (index < nodes.size) {
+                    val next = nodes[index]
+                    if (next is LatexNode.FontSize && next.content.isEmpty()) break
+                    content.add(next)
+                    index++
+                }
+                result.add(node.copy(content = content))
+            } else {
+                result.add(node)
+                index++
+            }
+        }
+        return result
     }
 }
