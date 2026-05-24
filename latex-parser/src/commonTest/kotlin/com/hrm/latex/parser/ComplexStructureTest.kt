@@ -402,6 +402,16 @@ class ComplexStructureTest {
     }
 
     @Test
+    fun testCalAliasScopesToGroupContent() {
+        val doc = parser.parse("{\\cal A + B}")
+        val group = doc.children[0] as LatexNode.Group
+        val style = group.children[0] as LatexNode.Style
+        assertEquals(LatexNode.Style.StyleType.CALLIGRAPHIC, style.styleType)
+        assertTrue(style.content.isNotEmpty())
+        assertTrue(style.content.any { it is LatexNode.Group })
+    }
+
+    @Test
     fun testFrakAlias() {
         val doc = parser.parse("\\frak g")
         val style = doc.children[0] as LatexNode.Style

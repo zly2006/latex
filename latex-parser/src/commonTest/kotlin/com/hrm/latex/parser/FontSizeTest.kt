@@ -64,7 +64,8 @@ class FontSizeTest {
 
         assertEquals(LatexNode.FontSize.SizeType.SMALL, fontSize.sizeType)
         assertTrue(fontSize.content.isNotEmpty())
-        assertEquals("x", (fontSize.content[0] as LatexNode.Text).content)
+        val content = assertIs<LatexNode.Group>(fontSize.content[0])
+        assertEquals("x", (content.children[0] as LatexNode.Text).content)
     }
 
     @Test
@@ -74,5 +75,31 @@ class FontSizeTest {
 
         assertEquals(LatexNode.FontSize.SizeType.HUGE_2, fontSize.sizeType)
         assertIs<LatexNode.Group>(fontSize.content[0])
+    }
+
+    @Test
+    fun testBracedContentDoesNotEndDeclarationScope() {
+        val doc = parser.parse("{\\small{x} y}")
+        val group = assertIs<LatexNode.Group>(doc.children[0])
+        val fontSize = assertIs<LatexNode.FontSize>(group.children[0])
+        val content = assertIs<LatexNode.Group>(fontSize.content[0])
+
+        assertEquals(LatexNode.FontSize.SizeType.SMALL, fontSize.sizeType)
+        assertEquals(3, content.children.size)
+        assertIs<LatexNode.Group>(content.children[0])
+        assertEquals("y", (content.children[2] as LatexNode.Text).content)
+    }
+
+    @Test
+    fun testFontSizeSourceRangeCoversScopedContent() {
+        val input = "{\\small x + y}"
+        val doc = parser.parse(input)
+        val group = assertIs<LatexNode.Group>(doc.children[0])
+        val fontSize = assertIs<LatexNode.FontSize>(group.children[0])
+        val range = fontSize.sourceRange
+
+        assertTrue(range != null)
+        assertEquals(1, range.start)
+        assertEquals(input.length - 1, range.end)
     }
 }

@@ -254,6 +254,7 @@ internal data class LayoutHints(
 internal data class RenderContext(
     // ── 样式状态 ──
     val fontSize: TextUnit,
+    val baseFontSize: TextUnit = fontSize,
     val color: Color,
     val errorColor: Color = Color(0xFFCC0000),
     val mathStyle: MathStyle = MathStyle.DISPLAY,
@@ -317,6 +318,7 @@ internal fun LatexConfig.toContext(
 
     return RenderContext(
         fontSize = fontSize,
+        baseFontSize = fontSize,
         color = resolvedColor,
         errorColor = resolvedErrorColor,
         fontFamily = fontFamilies.main,
@@ -470,5 +472,5 @@ internal fun RenderContext.applyFontSize(sizeType: LatexNode.FontSize.SizeType):
         LatexNode.FontSize.SizeType.HUGE -> 2.074f
         LatexNode.FontSize.SizeType.HUGE_2 -> 2.488f
     }
-    return copy(fontSize = fontSize * scale)
+    return copy(fontSize = baseFontSize * scale * mathStyle.scaleFactor())
 }
