@@ -323,4 +323,14 @@ class MathMLVisitorTest {
         val result = MathMLVisitor.convert(doc)
         assertTrue(result.contains("<menclose"))
     }
+
+    @Test
+    fun testNestedFontSizeUsesAbsoluteDeclarationScale() {
+        val doc = parser.parse("{\\small {\\Huge x} {\\normalsize y}}")
+        val result = MathMLVisitor.convert(doc)
+
+        assertTrue(result.contains("mathsize=\"90%\""), result)
+        assertTrue(result.contains("mathsize=\"276.444%\""), result)
+        assertTrue(result.contains("mathsize=\"111.111%\""), result)
+    }
 }

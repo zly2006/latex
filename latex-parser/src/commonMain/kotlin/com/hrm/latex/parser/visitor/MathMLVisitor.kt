@@ -23,6 +23,7 @@
 package com.hrm.latex.parser.visitor
 
 import com.hrm.latex.parser.model.LatexNode
+import kotlin.math.round
 
 /**
  * LaTeX AST → MathML 转换访问者
@@ -52,6 +53,7 @@ import com.hrm.latex.parser.model.LatexNode
  * - `<mphantom>` 幻影
  */
 class MathMLVisitor : BaseLatexVisitor<String>() {
+    private var currentFontScale: Float = 1.0f
 
     companion object {
         /**
@@ -305,20 +307,38 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
     }
 
     override fun visitFontSize(node: LatexNode.FontSize): String {
-        val content = node.content.joinToString("") { visit(it) }
-        val size = when (node.sizeType) {
-            LatexNode.FontSize.SizeType.TINY -> "50%"
-            LatexNode.FontSize.SizeType.SCRIPT_SIZE -> "70%"
-            LatexNode.FontSize.SizeType.FOOTNOTE_SIZE -> "80%"
-            LatexNode.FontSize.SizeType.SMALL -> "90%"
-            LatexNode.FontSize.SizeType.NORMAL_SIZE -> "100%"
-            LatexNode.FontSize.SizeType.LARGE -> "120%"
-            LatexNode.FontSize.SizeType.LARGE_2 -> "144%"
-            LatexNode.FontSize.SizeType.LARGE_3 -> "173%"
-            LatexNode.FontSize.SizeType.HUGE -> "207%"
-            LatexNode.FontSize.SizeType.HUGE_2 -> "249%"
+        val inheritedScale = currentFontScale
+        val targetScale = node.sizeType.scaleFactor()
+        currentFontScale = targetScale
+        val content = try {
+            node.content.joinToString("") { visit(it) }
+        } finally {
+            currentFontScale = inheritedScale
         }
+        val size = formatPercent(targetScale / inheritedScale)
         return "<mstyle mathsize=\"$size\">$content</mstyle>"
+    }
+
+    private fun LatexNode.FontSize.SizeType.scaleFactor(): Float = when (this) {
+        LatexNode.FontSize.SizeType.TINY -> 0.5f
+        LatexNode.FontSize.SizeType.SCRIPT_SIZE -> 0.7f
+        LatexNode.FontSize.SizeType.FOOTNOTE_SIZE -> 0.8f
+        LatexNode.FontSize.SizeType.SMALL -> 0.9f
+        LatexNode.FontSize.SizeType.NORMAL_SIZE -> 1.0f
+        LatexNode.FontSize.SizeType.LARGE -> 1.2f
+        LatexNode.FontSize.SizeType.LARGE_2 -> 1.44f
+        LatexNode.FontSize.SizeType.LARGE_3 -> 1.728f
+        LatexNode.FontSize.SizeType.HUGE -> 2.074f
+        LatexNode.FontSize.SizeType.HUGE_2 -> 2.488f
+    }
+
+    private fun formatPercent(scale: Float): String {
+        val percent = round(scale * 100_000f) / 1_000f
+        return if (percent % 1f == 0f) {
+            "${percent.toInt()}%"
+        } else {
+            "${percent.toString().trimEnd('0').trimEnd('.')}%"
+        }
     }
 
     override fun visitBigOperator(node: LatexNode.BigOperator): String {
