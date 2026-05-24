@@ -76,4 +76,5 @@ internal interface LatexParserContext {
     fun parseFactor(): LatexNode?
     fun parseArgument(): LatexNode?
     fun parseGroup(): LatexNode.Group
+    fun normalizeStyleDeclarations(nodes: List<LatexNode>): List<LatexNode>
 }

@@ -102,4 +102,39 @@ class FontSizeTest {
         assertEquals(1, range.start)
         assertEquals(input.length - 1, range.end)
     }
+
+    @Test
+    fun testFontSizeDeclarationInEquationEnvironment() {
+        val doc = parser.parse("\\begin{equation}\\small x\\end{equation}")
+        val environment = assertIs<LatexNode.Environment>(doc.children[0])
+        val fontSize = assertIs<LatexNode.FontSize>(environment.content[0])
+
+        assertEquals(LatexNode.FontSize.SizeType.SMALL, fontSize.sizeType)
+        val content = assertIs<LatexNode.Text>(fontSize.content[0])
+        assertEquals("x", content.content)
+    }
+
+    @Test
+    fun testFontSizeDeclarationInMatrixCell() {
+        val doc = parser.parse("\\begin{matrix}\\small x & y\\end{matrix}")
+        val matrix = assertIs<LatexNode.Matrix>(doc.children[0])
+        val firstCell = assertIs<LatexNode.Group>(matrix.rows[0][0])
+        val fontSize = assertIs<LatexNode.FontSize>(firstCell.children[0])
+
+        assertEquals(LatexNode.FontSize.SizeType.SMALL, fontSize.sizeType)
+        val content = assertIs<LatexNode.Group>(fontSize.content[0])
+        assertEquals("x", (content.children[0] as LatexNode.Text).content)
+    }
+
+    @Test
+    fun testFontSizeDeclarationInCasesExpression() {
+        val doc = parser.parse("\\begin{cases}\\small x & x > 0\\end{cases}")
+        val cases = assertIs<LatexNode.Cases>(doc.children[0])
+        val expression = assertIs<LatexNode.Group>(cases.cases[0].first)
+        val fontSize = assertIs<LatexNode.FontSize>(expression.children[0])
+
+        assertEquals(LatexNode.FontSize.SizeType.SMALL, fontSize.sizeType)
+        val content = assertIs<LatexNode.Group>(fontSize.content[0])
+        assertEquals("x", (content.children[0] as LatexNode.Text).content)
+    }
 }

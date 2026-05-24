@@ -118,7 +118,7 @@ internal class ParseSession(
         }
 
         val document = LatexNode.Document(
-            applyStyleDeclarations(children),
+            normalizeStyleDeclarations(children),
             sourceRange = SourceRange(0, inputLength)
         )
         HLog.d(TAG) { "解析成功，生成 ${children.size} 个节点, 诊断: ${diagnostics.size} 条" }
@@ -247,7 +247,7 @@ internal class ParseSession(
         if (!tokenStream.isEOF()) {
             tokenStream.expect("}")
         }
-        return LatexNode.Group(applyStyleDeclarations(children), sourceRange = tokenStream.rangeFrom(startOffset))
+        return LatexNode.Group(normalizeStyleDeclarations(children), sourceRange = tokenStream.rangeFrom(startOffset))
     }
 
     override fun parseArgument(): LatexNode? {
@@ -279,7 +279,7 @@ internal class ParseSession(
         }
 
         val range = tokenStream.rangeFrom(startOffset)
-        val normalizedChildren = applyStyleDeclarations(children)
+        val normalizedChildren = normalizeStyleDeclarations(children)
         return if (count == 2) {
             LatexNode.DisplayMath(normalizedChildren, sourceRange = range)
         } else {
@@ -294,7 +294,7 @@ internal class ParseSession(
         }
     }
 
-    private fun applyStyleDeclarations(nodes: List<LatexNode>): List<LatexNode> {
+    override fun normalizeStyleDeclarations(nodes: List<LatexNode>): List<LatexNode> {
         if (nodes.none { it.isStyleDeclaration() }) return nodes
         val result = mutableListOf<LatexNode>()
         val activeDeclarations = mutableListOf<LatexNode>()

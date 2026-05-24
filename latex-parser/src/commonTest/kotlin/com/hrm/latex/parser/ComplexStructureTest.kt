@@ -412,6 +412,16 @@ class ComplexStructureTest {
     }
 
     @Test
+    fun testStyleDeclarationInEnvironmentContent() {
+        val doc = parser.parse("\\begin{equation}\\bf x\\end{equation}")
+        val env = doc.children[0] as LatexNode.Environment
+        val style = env.content[0] as LatexNode.Style
+
+        assertEquals(LatexNode.Style.StyleType.BOLD, style.styleType)
+        assertEquals("x", (style.content[0] as LatexNode.Text).content)
+    }
+
+    @Test
     fun testFrakAlias() {
         val doc = parser.parse("\\frak g")
         val style = doc.children[0] as LatexNode.Style
