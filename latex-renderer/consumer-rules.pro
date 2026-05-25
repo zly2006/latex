@@ -22,3 +22,14 @@
 
 # 公共 API 注解（@OptIn / @Stable / @Immutable 等运行时注解）
 -keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations
+
+# -----------------------------------------------------------------------------
+# Compose Desktop / 普通 JVM ProGuard 兼容（仅压制 fatal warning，不阻止 shrink）
+# -----------------------------------------------------------------------------
+# 与 latex-parser / latex-base 同因：Kotlin 编译器在 `companion object` 中
+# `private inline fun` + `private val` 的提升机制，会在某些 KMP/Kotlin 版本组合下
+# 触发 `*$Companion.class` 与 outer 类静态字段的引用错位，被 ProGuard 全图静态校验
+# 视为 unresolved 并升级为 fatal。运行期 JVM 惰性解析不触发，仅构建期失败。
+# 仅压制对应 warning，不使用 `-keep`。
+-dontwarn com.hrm.latex.**
+

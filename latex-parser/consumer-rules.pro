@@ -21,3 +21,23 @@
 
 # 公共 API 注解（如 @get:JvmName / @JvmField 等）
 -keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations
+
+# -----------------------------------------------------------------------------
+# Compose Desktop / 普通 JVM ProGuard 兼容（仅压制 fatal warning，不阻止 shrink）
+# -----------------------------------------------------------------------------
+# 背景：
+#   Kotlin 编译器在处理 `companion object` 中 `private inline fun` + `private val`
+#   组合（如 LatexTokenizer.TEXT_STOP_CHARS）时，会把私有字段 lift 到 outer 类的
+#   synthetic 静态字段并生成桥接访问器；在某些 Kotlin/KMP 版本组合下，
+#   `*$Companion.class` 仍按原名字面引用 outer 类的字段，但 outer 类侧字段名带了
+#   合成后缀（如 `$cp`），ProGuard 全图静态校验时会判定为 unresolved 并把
+#   warning 升级为 fatal：
+#     Warning: ...$Companion: can't find referenced field 'TEXT_STOP_CHARS'
+#     java.io.IOException: Please correct the above warnings first.
+#   JVM 运行时按惰性解析处理，且实际调用全被外层内联，运行期不会触发该路径。
+#
+# 处理方式：
+#   仅压制对应的 warning，避免 fatal；不要使用 `-keep`，让 R8/ProGuard 继续按
+#   正常规则 shrink 与 obfuscate 本库代码，避免下游应用体积膨胀。
+-dontwarn com.hrm.latex.**
+
