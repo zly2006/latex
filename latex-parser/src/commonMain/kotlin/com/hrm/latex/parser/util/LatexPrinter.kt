@@ -58,6 +58,21 @@ class LatexPrinter : BaseLatexVisitor<String>() {
         output.append("Text('${node.content}')")
         return ""
     }
+
+    override fun visitFontSize(node: LatexNode.FontSize): String {
+        output.append("FontSize(${node.sizeType})")
+        if (node.content.isNotEmpty()) {
+            output.append("\n")
+            indent++
+            node.content.forEach {
+                printIndent()
+                visit(it)
+                output.append("\n")
+            }
+            indent--
+        }
+        return ""
+    }
     
     override fun visitFraction(node: LatexNode.Fraction): String {
         output.append("Fraction")

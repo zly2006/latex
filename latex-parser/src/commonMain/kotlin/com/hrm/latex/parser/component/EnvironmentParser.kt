@@ -124,7 +124,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                 is LatexToken.EndEnvironment -> {
                     if (token.name == envName) {
                         if (currentCell.isNotEmpty()) {
-                            currentRow.add(LatexNode.Group(currentCell))
+                            currentRow.add(LatexNode.Group(context.normalizeStyleDeclarations(currentCell)))
                         }
                         if (currentRow.isNotEmpty()) {
                             rows.add(currentRow)
@@ -138,14 +138,14 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                 }
 
                 is LatexToken.Ampersand -> {
-                    currentRow.add(LatexNode.Group(currentCell))
+                    currentRow.add(LatexNode.Group(context.normalizeStyleDeclarations(currentCell)))
                     currentCell = mutableListOf()
                     tokenStream.advance()
                 }
 
                 is LatexToken.NewLine -> {
                     if (currentCell.isNotEmpty()) {
-                        currentRow.add(LatexNode.Group(currentCell))
+                        currentRow.add(LatexNode.Group(context.normalizeStyleDeclarations(currentCell)))
                     }
                     if (currentRow.isNotEmpty()) {
                         rows.add(currentRow)
@@ -161,7 +161,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                         if (handleSpecialNodes && (node is LatexNode.HLine || node is LatexNode.CLine)) {
                             // 先保存当前累积的内容
                             if (currentCell.isNotEmpty()) {
-                                currentRow.add(LatexNode.Group(currentCell))
+                                currentRow.add(LatexNode.Group(context.normalizeStyleDeclarations(currentCell)))
                                 currentCell = mutableListOf()
                             }
                             if (currentRow.isNotEmpty()) {
@@ -260,7 +260,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                 is LatexToken.EndEnvironment -> {
                     if (token.name == envName) {
                         if (currentLine.isNotEmpty()) {
-                            lines.add(LatexNode.Group(currentLine))
+                            lines.add(LatexNode.Group(context.normalizeStyleDeclarations(currentLine)))
                         }
                         tokenStream.advance()
                         break
@@ -271,7 +271,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
 
                 is LatexToken.NewLine -> {
                     if (currentLine.isNotEmpty()) {
-                        lines.add(LatexNode.Group(currentLine))
+                        lines.add(LatexNode.Group(context.normalizeStyleDeclarations(currentLine)))
                     }
                     currentLine = mutableListOf()
                     tokenStream.advance()
@@ -320,7 +320,8 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                     if (token.name == envName) {
                         if (expression.isNotEmpty()) {
                             cases.add(
-                                LatexNode.Group(expression) to LatexNode.Group(condition)
+                                LatexNode.Group(context.normalizeStyleDeclarations(expression)) to
+                                    LatexNode.Group(context.normalizeStyleDeclarations(condition))
                             )
                         }
                         tokenStream.advance()
@@ -338,7 +339,8 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                 is LatexToken.NewLine -> {
                     if (expression.isNotEmpty()) {
                         cases.add(
-                            LatexNode.Group(expression) to LatexNode.Group(condition)
+                            LatexNode.Group(context.normalizeStyleDeclarations(expression)) to
+                                LatexNode.Group(context.normalizeStyleDeclarations(condition))
                         )
                     }
                     expression = mutableListOf()
@@ -408,7 +410,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
             }
         }
 
-        return content
+        return context.normalizeStyleDeclarations(content)
     }
 
     /**
@@ -434,7 +436,8 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                 if (!tokenStream.isEOF()) {
                     tokenStream.advance() // consume ]
                 }
-                if (nodes.size == 1) nodes[0] else LatexNode.Group(nodes)
+                val normalizedNodes = context.normalizeStyleDeclarations(nodes)
+                if (normalizedNodes.size == 1) normalizedNodes[0] else LatexNode.Group(normalizedNodes)
             } else {
                 LatexNode.Text(customEnv.defaultArg)
             }
@@ -458,7 +461,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
         val expandedEnd = replaceParameters(customEnv.endDef, args)
 
         // 组装：beginDef + body + endDef
-        val allContent = expandedBegin + bodyContent + expandedEnd
+        val allContent = context.normalizeStyleDeclarations(expandedBegin + bodyContent + expandedEnd)
         return LatexNode.Group(allContent)
     }
 

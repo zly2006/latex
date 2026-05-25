@@ -254,6 +254,7 @@ internal data class LayoutHints(
 internal data class RenderContext(
     // ── 样式状态 ──
     val fontSize: TextUnit,
+    val baseFontSize: TextUnit = fontSize,
     val color: Color,
     val errorColor: Color = Color(0xFFCC0000),
     val mathStyle: MathStyle = MathStyle.DISPLAY,
@@ -317,6 +318,7 @@ internal fun LatexConfig.toContext(
 
     return RenderContext(
         fontSize = fontSize,
+        baseFontSize = fontSize,
         color = resolvedColor,
         errorColor = resolvedErrorColor,
         fontFamily = fontFamilies.main,
@@ -455,4 +457,20 @@ internal fun RenderContext.applyMathStyle(mathStyleType: LatexNode.MathStyle.Mat
         fontSize = fontSize * scaleFactor,
         mathStyle = newMode
     )
+}
+
+internal fun RenderContext.applyFontSize(sizeType: LatexNode.FontSize.SizeType): RenderContext {
+    val scale = when (sizeType) {
+        LatexNode.FontSize.SizeType.TINY -> 0.5f
+        LatexNode.FontSize.SizeType.SCRIPT_SIZE -> 0.7f
+        LatexNode.FontSize.SizeType.FOOTNOTE_SIZE -> 0.8f
+        LatexNode.FontSize.SizeType.SMALL -> 0.9f
+        LatexNode.FontSize.SizeType.NORMAL_SIZE -> 1.0f
+        LatexNode.FontSize.SizeType.LARGE -> 1.2f
+        LatexNode.FontSize.SizeType.LARGE_2 -> 1.44f
+        LatexNode.FontSize.SizeType.LARGE_3 -> 1.728f
+        LatexNode.FontSize.SizeType.HUGE -> 2.074f
+        LatexNode.FontSize.SizeType.HUGE_2 -> 2.488f
+    }
+    return copy(fontSize = baseFontSize * scale * mathStyle.scaleFactor())
 }

@@ -118,7 +118,7 @@ internal class ParseSession(
         }
 
         val document = LatexNode.Document(
-            children,
+            normalizeStyleDeclarations(children),
             sourceRange = SourceRange(0, inputLength)
         )
         HLog.d(TAG) { "解析成功，生成 ${children.size} 个节点, 诊断: ${diagnostics.size} 条" }
@@ -247,7 +247,7 @@ internal class ParseSession(
         if (!tokenStream.isEOF()) {
             tokenStream.expect("}")
         }
-        return LatexNode.Group(children, sourceRange = tokenStream.rangeFrom(startOffset))
+        return LatexNode.Group(normalizeStyleDeclarations(children), sourceRange = tokenStream.rangeFrom(startOffset))
     }
 
     override fun parseArgument(): LatexNode? {
@@ -279,10 +279,11 @@ internal class ParseSession(
         }
 
         val range = tokenStream.rangeFrom(startOffset)
+        val normalizedChildren = normalizeStyleDeclarations(children)
         return if (count == 2) {
-            LatexNode.DisplayMath(children, sourceRange = range)
+            LatexNode.DisplayMath(normalizedChildren, sourceRange = range)
         } else {
-            LatexNode.InlineMath(children, sourceRange = range)
+            LatexNode.InlineMath(normalizedChildren, sourceRange = range)
         }
     }
 
@@ -291,5 +292,92 @@ internal class ParseSession(
             is LatexToken.LeftBrace -> parseGroup()
             else -> parseFactor() ?: LatexNode.Text("")
         }
+    }
+
+    override fun normalizeStyleDeclarations(nodes: List<LatexNode>): List<LatexNode> {
+        if (nodes.none { it.isStyleDeclaration() }) return nodes
+        val result = mutableListOf<LatexNode>()
+        val activeDeclarations = mutableListOf<LatexNode>()
+        val segment = mutableListOf<LatexNode>()
+
+        fun flushSegment() {
+            if (segment.isEmpty()) return
+            if (activeDeclarations.isEmpty()) {
+                result.addAll(segment)
+            } else {
+                result.add(wrapWithDeclarations(segment.toList(), activeDeclarations))
+            }
+            segment.clear()
+        }
+
+        var index = 0
+        while (index < nodes.size) {
+            val node = nodes[index]
+            if (node.isStyleDeclaration()) {
+                flushSegment()
+                updateActiveDeclaration(activeDeclarations, node)
+                index++
+                while (index < nodes.size && nodes[index] is LatexNode.Space) {
+                    index++
+                }
+            } else {
+                segment.add(node)
+                index++
+            }
+        }
+        flushSegment()
+        return result
+    }
+
+    private fun LatexNode.isStyleDeclaration(): Boolean = when (this) {
+        is LatexNode.Style -> content.isEmpty()
+        is LatexNode.MathStyle -> content.isEmpty()
+        is LatexNode.FontSize -> content.isEmpty()
+        else -> false
+    }
+
+    private fun updateActiveDeclaration(activeDeclarations: MutableList<LatexNode>, declaration: LatexNode) {
+        val existingIndex = activeDeclarations.indexOfLast { existing ->
+            (existing is LatexNode.Style && declaration is LatexNode.Style) ||
+                (existing is LatexNode.MathStyle && declaration is LatexNode.MathStyle) ||
+                (existing is LatexNode.FontSize && declaration is LatexNode.FontSize)
+        }
+        if (existingIndex >= 0) {
+            activeDeclarations[existingIndex] = declaration
+        } else {
+            activeDeclarations.add(declaration)
+        }
+    }
+
+    private fun wrapWithDeclarations(content: List<LatexNode>, declarations: List<LatexNode>): LatexNode {
+        var node: LatexNode = if (content.size == 1) content[0] else LatexNode.Group(content, mergeRange(content))
+        for (declaration in declarations.asReversed()) {
+            node = when (declaration) {
+                is LatexNode.Style -> declaration.copy(
+                    content = listOf(node),
+                    sourceRange = declaration.sourceRange.mergeWith(node.sourceRange)
+                )
+                is LatexNode.MathStyle -> declaration.copy(
+                    content = listOf(node),
+                    sourceRange = declaration.sourceRange.mergeWith(node.sourceRange)
+                )
+                is LatexNode.FontSize -> declaration.copy(
+                    content = listOf(node),
+                    sourceRange = declaration.sourceRange.mergeWith(node.sourceRange)
+                )
+                else -> node
+            }
+        }
+        return node
+    }
+
+    private fun mergeRange(nodes: List<LatexNode>): SourceRange? {
+        return nodes.mapNotNull { it.sourceRange }.reduceOrNull { acc, range -> acc.merge(range) }
+    }
+
+    private fun SourceRange?.mergeWith(other: SourceRange?): SourceRange? = when {
+        this != null && other != null -> merge(other)
+        this != null -> this
+        else -> other
     }
 }

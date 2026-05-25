@@ -89,6 +89,12 @@
 </details>
 
 <details>
+<summary><b>字号（10）</b></summary>
+
+`\tiny`, `\scriptsize`, `\footnotesize`, `\small`, `\normalsize`, `\large`, `\Large`, `\LARGE`, `\huge`, `\Huge`
+</details>
+
+<details>
 <summary><b>数学模式切换</b></summary>
 
 `\displaystyle`, `\textstyle`, `\scriptstyle`, `\scriptscriptstyle`, `$...$`（行内）, `$$...$$`（展示）

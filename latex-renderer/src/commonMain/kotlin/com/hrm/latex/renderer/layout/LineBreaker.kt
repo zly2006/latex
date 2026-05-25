@@ -159,7 +159,8 @@ internal class LineBreaker(private val maxWidth: Float) {
             is LatexNode.Delimited,
             is LatexNode.Style,
             is LatexNode.Color,
-            is LatexNode.MathStyle -> 1
+            is LatexNode.MathStyle,
+            is LatexNode.FontSize -> 1
 
             else -> 0
         }

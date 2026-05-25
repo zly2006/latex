@@ -152,6 +152,8 @@ val basicLatexPreviewGroups = listOf(
             PreviewItem("11", "mathop + limits", "\\[\\int_0^\\infty  {1 - \\mathop \\prod \\limits_{i = 1}^n \\left( {1 - {e^{ - {p_i}t}}} \\right){\\text{d}}t} \\]"),
             PreviewItem("12", "Bbb (mathbb 别名)", "\\Bbb{R} \\quad \\mathbb{R} \\quad \\Bbb R"),
             PreviewItem("13", "cal/frak/scr (legacy)", "\\cal A \\quad \\frak g \\quad \\scr F"),
+            PreviewItem("14", "字号阶梯", "\\tiny x \\scriptsize x \\footnotesize x \\small x \\normalsize x \\large x \\Large x \\LARGE x \\huge x \\Huge x"),
+            PreviewItem("15", "字号作用域", "{\\small a + b} \\quad {\\Huge c + d}"),
         )
     ),
     PreviewGroup(

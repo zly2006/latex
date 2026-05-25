@@ -97,6 +97,16 @@ class MathStyleTest {
     }
 
     @Test
+    fun testMathStyleDeclarationInEnvironmentContent() {
+        val doc = parser.parse("\\begin{equation}\\displaystyle x\\end{equation}")
+        val env = doc.children[0] as LatexNode.Environment
+        val mathStyle = env.content[0] as LatexNode.MathStyle
+
+        assertEquals(LatexNode.MathStyle.MathStyleType.DISPLAY, mathStyle.mathStyleType)
+        assertEquals("x", (mathStyle.content[0] as LatexNode.Text).content)
+    }
+
+    @Test
     fun testMathStyleInSum() {
         // \sum_{\scriptstyle i=1}^{\scriptstyle n}
         val doc = parser.parse("\\sum_{\\scriptstyle i=1}^{\\scriptstyle n}")

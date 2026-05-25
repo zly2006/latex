@@ -224,6 +224,10 @@ class AccessibilityVisitor : BaseLatexVisitor<String>() {
         return node.content.joinToString(" ") { visit(it) }.collapseSpaces()
     }
 
+    override fun visitFontSize(node: LatexNode.FontSize): String {
+        return node.content.joinToString(" ") { visit(it) }.collapseSpaces()
+    }
+
     override fun visitBigOperator(node: LatexNode.BigOperator): String {
         val op = bigOperatorName(node.operator)
         val sub = node.subscript?.let { "from ${visit(it)}" }
