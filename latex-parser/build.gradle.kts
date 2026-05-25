@@ -22,6 +22,12 @@ kotlin {
         }
 
         compilerOptions {}
+
+        // 发布消费方 R8 / ProGuard 规则，随 AAR 一起分发给下游使用方
+        optimization {
+            consumerKeepRules.publish = true
+            consumerKeepRules.file(file("consumer-rules.pro"))
+        }
     }
 
     listOf(
