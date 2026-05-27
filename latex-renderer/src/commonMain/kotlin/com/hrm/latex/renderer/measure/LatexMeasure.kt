@@ -107,8 +107,9 @@ class LatexMeasurerState internal constructor(
      * 测量逻辑，确保尺寸结果 100% 一致。
      *
      * @param latex LaTeX 字符串
-     * @param config 渲染配置（字号、颜色、字体等）
-     * @param isDarkTheme 是否深色模式
+     * @param config 渲染配置（字号、主题、字体等）
+     * @param isDarkTheme 当前环境是否为深色模式。
+     * 仅在 `config.theme = LatexTheme.auto(...)` 时用于选择 light/dark 色板。
      * @return [LatexDimensions]，包含完整渲染尺寸和基线信息；
      *   空输入或解析/测量失败时返回 null
      */
@@ -153,7 +154,8 @@ class LatexMeasurerState internal constructor(
      *
      * @param formulas LaTeX 字符串列表
      * @param config 渲染配置
-     * @param isDarkTheme 是否深色模式
+     * @param isDarkTheme 当前环境是否为深色模式。
+     * 仅在 `config.theme = LatexTheme.auto(...)` 时用于选择 light/dark 色板。
      * @return 与输入列表等长的 [LatexDimensions] 列表，测量失败的条目为 null
      */
     fun measureBatch(

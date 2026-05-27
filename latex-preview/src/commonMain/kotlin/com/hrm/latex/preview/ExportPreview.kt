@@ -49,6 +49,8 @@ import com.hrm.latex.renderer.export.ExportConfig
 import com.hrm.latex.renderer.export.ExportResult
 import com.hrm.latex.renderer.export.ImageFormat
 import com.hrm.latex.renderer.export.rememberLatexExporter
+import com.hrm.latex.renderer.model.LatexConfig
+import com.hrm.latex.renderer.model.LatexTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -194,7 +196,8 @@ private fun ExportPreviewCard(
     title: String,
     format: ImageFormat = ImageFormat.PNG
 ) {
-    val exporter = rememberLatexExporter()
+    val config = LatexConfig(theme = LatexTheme.material3())
+    val exporter = rememberLatexExporter(config)
     val scope = rememberCoroutineScope()
     var exportResult by remember { mutableStateOf<ExportResult?>(null) }
     var isExporting by remember { mutableStateOf(false) }
@@ -210,7 +213,7 @@ private fun ExportPreviewCard(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("原始渲染:", style = MaterialTheme.typography.labelMedium)
-        Latex(latex = latex, isDarkTheme = false)
+        Latex(latex = latex, config = config)
 
         Spacer(Modifier.height(4.dp))
 
@@ -225,6 +228,7 @@ private fun ExportPreviewCard(
                         exportResult = withContext(Dispatchers.Default) {
                             exporter.export(
                                 latex = latex,
+                                config = config,
                                 exportConfig = ExportConfig(scale = 2f, format = format)
                             )
                         }
@@ -263,7 +267,8 @@ private fun ExportPreviewCard(
 @Composable
 private fun ExportFormatComparisonCard() {
     val latex = "\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}"
-    val exporter = rememberLatexExporter()
+    val config = LatexConfig(theme = LatexTheme.material3())
+    val exporter = rememberLatexExporter(config)
     val scope = rememberCoroutineScope()
     var pngResult by remember { mutableStateOf<ExportResult?>(null) }
     var jpegResult by remember { mutableStateOf<ExportResult?>(null) }
@@ -274,7 +279,7 @@ private fun ExportFormatComparisonCard() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("原始渲染:", style = MaterialTheme.typography.labelMedium)
-        Latex(latex = latex, isDarkTheme = false)
+        Latex(latex = latex, config = config)
 
         Spacer(Modifier.height(4.dp))
 
@@ -285,12 +290,14 @@ private fun ExportFormatComparisonCard() {
                     pngResult = withContext(Dispatchers.Default) {
                         exporter.export(
                             latex = latex,
+                            config = config,
                             exportConfig = ExportConfig(scale = 2f, format = ImageFormat.PNG)
                         )
                     }
                     jpegResult = withContext(Dispatchers.Default) {
                         exporter.export(
                             latex = latex,
+                            config = config,
                             exportConfig = ExportConfig(
                                 scale = 2f,
                                 format = ImageFormat.JPEG,
@@ -348,7 +355,8 @@ private fun ExportFormatComparisonCard() {
 @Composable
 private fun ExportAllFormatComparisonCard() {
     val latex = "\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}"
-    val exporter = rememberLatexExporter()
+    val config = LatexConfig(theme = LatexTheme.material3())
+    val exporter = rememberLatexExporter(config)
     val scope = rememberCoroutineScope()
     var pngResult by remember { mutableStateOf<ExportResult?>(null) }
     var jpegResult by remember { mutableStateOf<ExportResult?>(null) }
@@ -360,7 +368,7 @@ private fun ExportAllFormatComparisonCard() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("原始渲染:", style = MaterialTheme.typography.labelMedium)
-        Latex(latex = latex, isDarkTheme = false)
+        Latex(latex = latex, config = config)
 
         Spacer(Modifier.height(4.dp))
 
@@ -371,12 +379,14 @@ private fun ExportAllFormatComparisonCard() {
                     pngResult = withContext(Dispatchers.Default) {
                         exporter.export(
                             latex = latex,
+                            config = config,
                             exportConfig = ExportConfig(scale = 2f, format = ImageFormat.PNG)
                         )
                     }
                     jpegResult = withContext(Dispatchers.Default) {
                         exporter.export(
                             latex = latex,
+                            config = config,
                             exportConfig = ExportConfig(
                                 scale = 2f,
                                 format = ImageFormat.JPEG,
@@ -387,6 +397,7 @@ private fun ExportAllFormatComparisonCard() {
                     webpResult = withContext(Dispatchers.Default) {
                         exporter.export(
                             latex = latex,
+                            config = config,
                             exportConfig = ExportConfig(
                                 scale = 2f,
                                 format = ImageFormat.WEBP,
@@ -461,7 +472,8 @@ private fun ExportAllFormatComparisonCard() {
 @Composable
 private fun ExportScaleComparisonCard() {
     val latex = "\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}"
-    val exporter = rememberLatexExporter()
+    val config = LatexConfig(theme = LatexTheme.material3())
+    val exporter = rememberLatexExporter(config)
     val scope = rememberCoroutineScope()
     var results by remember { mutableStateOf<Map<Float, ExportResult>>(emptyMap()) }
     var isExporting by remember { mutableStateOf(false) }
@@ -471,7 +483,7 @@ private fun ExportScaleComparisonCard() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("原始渲染:", style = MaterialTheme.typography.labelMedium)
-        Latex(latex = latex, isDarkTheme = false)
+        Latex(latex = latex, config = config)
 
         Spacer(Modifier.height(4.dp))
 
@@ -485,6 +497,7 @@ private fun ExportScaleComparisonCard() {
                         val result = withContext(Dispatchers.Default) {
                             exporter.export(
                                 latex = latex,
+                                config = config,
                                 exportConfig = ExportConfig(scale = scale)
                             )
                         }

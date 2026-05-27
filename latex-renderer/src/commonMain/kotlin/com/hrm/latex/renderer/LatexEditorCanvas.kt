@@ -40,6 +40,7 @@ import com.hrm.latex.renderer.layout.LayoutMap
 import com.hrm.latex.renderer.layout.LatexRenderer
 import com.hrm.latex.renderer.model.LatexConfig
 import com.hrm.latex.renderer.model.defaultLatexFontFamilies
+import com.hrm.latex.renderer.model.resolveThemeColors
 import com.hrm.latex.renderer.model.toContext
 
 /**
@@ -70,7 +71,8 @@ data class EditorRenderInfo(
  * @param children 解析后的 AST 节点列表（Document.children）
  * @param modifier 修饰符
  * @param config 渲染配置
- * @param isDarkTheme 是否深色模式
+ * @param isDarkTheme 当前环境是否为深色模式。
+ * 仅在 `config.theme = LatexTheme.auto(...)` 时用于选择 light/dark 色板。
  * @param layoutMap 布局映射表，测量阶段会将节点位置信息写入其中
  * @param onRenderInfoChanged 渲染信息变化回调
  * @param overlay 叠加绘制回调（在内容绘制之后调用，可用于绘制光标/选区）
@@ -86,11 +88,7 @@ fun LatexEditorCanvas(
     onRenderInfoChanged: ((EditorRenderInfo) -> Unit)? = null,
     overlay: (DrawScope.() -> Unit)? = null
 ) {
-    val resolvedBackgroundColor = if (isDarkTheme) {
-        config.darkBackgroundColor
-    } else {
-        config.backgroundColor
-    }
+    val resolvedThemeColors = config.resolveThemeColors(isDarkTheme)
     val fontFamilies = config.mathFont.fontFamiliesOrNull() ?: defaultLatexFontFamilies()
 
     // fontFamilies 中的 bytes 字段已由 MathFont.OTF 构造时同步注入，
@@ -129,7 +127,7 @@ fun LatexEditorCanvas(
     Canvas(modifier = modifier.size(widthDp, heightDp)) {
         // 1. 绘制 LaTeX 内容
         with(LatexRenderer) {
-            draw(renderResult, resolvedBackgroundColor)
+            draw(renderResult, resolvedThemeColors.backgroundColor)
         }
 
         // 2. 叠加编辑器 UI（光标、选区等）

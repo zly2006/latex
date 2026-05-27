@@ -200,7 +200,7 @@
 ```kotlin
 import com.hrm.latex.renderer.Latex
 import com.hrm.latex.renderer.model.LatexConfig
-import androidx.compose.ui.graphics.Color
+import com.hrm.latex.renderer.model.LatexTheme
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -209,11 +209,51 @@ fun MyScreen() {
         latex = "\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}",
         config = LatexConfig(
             fontSize = 20.sp,
-            color = Color.Black,
-            darkColor = Color.White // 自动支持深色模式
+            theme = LatexTheme.auto()
         )
     )
 }
+```
+
+### 主题配置
+
+使用 `LatexTheme` 控制公式的前景色和背景色：
+
+```kotlin
+import com.hrm.latex.renderer.model.LatexTheme
+
+// 跟随系统深浅色
+LatexConfig(theme = LatexTheme.auto())
+
+// 固定浅色主题
+LatexConfig(theme = LatexTheme.light())
+
+// 固定深色主题
+LatexConfig(theme = LatexTheme.dark())
+
+// 跟随当前 Material 3 ColorScheme
+LatexConfig(theme = LatexTheme.material3())
+```
+
+如果需要自定义颜色，可以通过 `LatexThemeColors` 组合：
+
+```kotlin
+import androidx.compose.ui.graphics.Color
+import com.hrm.latex.renderer.model.LatexTheme
+import com.hrm.latex.renderer.model.LatexThemeColors
+
+LatexConfig(
+    theme = LatexTheme.auto(
+        light = LatexThemeColors(
+            color = Color(0xFF111111),
+            backgroundColor = Color.Transparent
+        ),
+        dark = LatexThemeColors(
+            color = Color(0xFFF5F5F5),
+            backgroundColor = Color.Transparent
+        )
+    )
+)
 ```
 
 ### 自动换行

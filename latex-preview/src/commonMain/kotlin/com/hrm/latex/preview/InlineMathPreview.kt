@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.hrm.latex.renderer.Latex
 import com.hrm.latex.renderer.measure.rememberLatexMeasurer
 import com.hrm.latex.renderer.model.LatexConfig
+import com.hrm.latex.renderer.model.LatexTheme
 import kotlin.math.round
 
 private fun Float.toFixed1(): String = (round(this * 10) / 10).toString()
@@ -199,7 +200,10 @@ fun InlineMathCard(
     formula: String,
     textAfter: String
 ) {
-    val config = LatexConfig(fontSize = 16.sp)
+    val config = LatexConfig(
+        fontSize = 16.sp,
+        theme = LatexTheme.material3()
+    )
     val measurer = rememberLatexMeasurer(config)
     val density = LocalDensity.current
 
@@ -270,7 +274,10 @@ fun MultiInlineMathCard(
     title: String,
     segments: List<TextSegment>
 ) {
-    val config = LatexConfig(fontSize = 16.sp)
+    val config = LatexConfig(
+        fontSize = 16.sp,
+        theme = LatexTheme.material3()
+    )
     val measurer = rememberLatexMeasurer(config)
     val density = LocalDensity.current
 
@@ -341,7 +348,10 @@ fun MultiInlineMathCard(
  */
 @Composable
 fun BatchMeasureCard() {
-    val config = LatexConfig(fontSize = 16.sp)
+    val config = LatexConfig(
+        fontSize = 16.sp,
+        theme = LatexTheme.material3()
+    )
     val measurer = rememberLatexMeasurer(config)
 
     val formulas = listOf(

@@ -69,7 +69,8 @@ data class LatexAnimationConfig(
  * @param modifier 修饰符
  * @param config 渲染配置
  * @param animationConfig 动画配置
- * @param isDarkTheme 深色模式
+ * @param isDarkTheme 当前环境是否为深色模式。
+ * 仅在 `config.theme = LatexTheme.auto(...)` 时用于选择 light/dark 色板。
  */
 @Composable
 fun AnimatedLatex(

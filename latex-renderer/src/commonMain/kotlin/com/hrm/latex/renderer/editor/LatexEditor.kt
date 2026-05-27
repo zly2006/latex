@@ -73,7 +73,8 @@ import kotlinx.coroutines.delay
  * @param editorState 编辑器状态（通过 [rememberEditorState] 创建）
  * @param modifier 修饰符
  * @param config 渲染配置
- * @param isDarkTheme 深色模式
+ * @param isDarkTheme 当前环境是否为深色模式。
+ * 仅在 `config.theme = LatexTheme.auto(...)` 时用于选择 light/dark 色板。
  * @param cursorColor 光标颜色
  * @param selectionColor 选区背景色
  * @param showSourceText 是否显示源码文本框（调试用）

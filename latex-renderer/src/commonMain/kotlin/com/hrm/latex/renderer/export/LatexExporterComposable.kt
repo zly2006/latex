@@ -41,6 +41,7 @@ import com.hrm.latex.renderer.layout.LatexRenderer
 import com.hrm.latex.renderer.model.LatexConfig
 import com.hrm.latex.renderer.model.LatexFontFamilies
 import com.hrm.latex.renderer.model.defaultLatexFontFamilies
+import com.hrm.latex.renderer.model.resolveThemeColors
 import com.hrm.latex.renderer.model.toContext
 import kotlin.math.ceil
 
@@ -105,9 +106,10 @@ class LatexExporterState internal constructor(
      * 4. 使用 [encodeToFormat] 编码为目标格式字节数组
      *
      * @param latex LaTeX 字符串
-     * @param config 渲染配置（字号、颜色、背景色等）
+     * @param config 渲染配置（字号、主题、字体等）
      * @param exportConfig 导出配置（缩放倍率、格式、质量、背景透明度）
-     * @param isDarkTheme 是否深色模式
+     * @param isDarkTheme 当前环境是否为深色模式。
+     * 仅在 `config.theme = LatexTheme.auto(...)` 时用于选择 light/dark 色板。
      * @return [ExportResult]，包含 ImageBitmap、编码字节、尺寸信息；解析或渲染失败时返回 null
      */
     fun export(
@@ -131,6 +133,7 @@ class LatexExporterState internal constructor(
             // 这样 TextMeasurer 会以目标字号测量文本，字体引擎以正确字号光栅化
             val scaledConfig = config.copy(fontSize = config.fontSize * scale)
             val context = scaledConfig.toContext(isDarkTheme, resolvedFontFamilies)
+            val resolvedThemeColors = scaledConfig.resolveThemeColors(isDarkTheme)
 
             // 使用 LatexRenderer 共享逻辑进行测量（与 LatexDocument 同一份代码）
             val renderResult = LatexRenderer.measure(
@@ -151,10 +154,8 @@ class LatexExporterState internal constructor(
                     format != ImageFormat.JPEG
             val backgroundColor = if (useTransparent) {
                 Color.Transparent
-            } else if (isDarkTheme) {
-                scaledConfig.darkBackgroundColor
             } else {
-                scaledConfig.backgroundColor
+                resolvedThemeColors.backgroundColor
             }
 
             // 使用 LatexRenderer 共享逻辑进行绘制（与 LatexDocument 同一份代码）

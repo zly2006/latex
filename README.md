@@ -200,7 +200,7 @@ In a Compose Multiplatform project, you can use the `Latex` component directly. 
 ```kotlin
 import com.hrm.latex.renderer.Latex
 import com.hrm.latex.renderer.model.LatexConfig
-import androidx.compose.ui.graphics.Color
+import com.hrm.latex.renderer.model.LatexTheme
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -209,11 +209,51 @@ fun MyScreen() {
         latex = "\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}",
         config = LatexConfig(
             fontSize = 20.sp,
-            color = Color.Black,
-            darkColor = Color.White // Automatic dark mode support
+            theme = LatexTheme.auto()
         )
     )
 }
+```
+
+### Theme Configuration
+
+Use `LatexTheme` to control formula foreground/background colors:
+
+```kotlin
+import com.hrm.latex.renderer.model.LatexTheme
+
+// Follow system light/dark mode
+LatexConfig(theme = LatexTheme.auto())
+
+// Fixed light theme
+LatexConfig(theme = LatexTheme.light())
+
+// Fixed dark theme
+LatexConfig(theme = LatexTheme.dark())
+
+// Follow current Material 3 ColorScheme
+LatexConfig(theme = LatexTheme.material3())
+```
+
+If you need custom colors, build them from `LatexThemeColors`:
+
+```kotlin
+import androidx.compose.ui.graphics.Color
+import com.hrm.latex.renderer.model.LatexTheme
+import com.hrm.latex.renderer.model.LatexThemeColors
+
+LatexConfig(
+    theme = LatexTheme.auto(
+        light = LatexThemeColors(
+            color = Color(0xFF111111),
+            backgroundColor = Color.Transparent
+        ),
+        dark = LatexThemeColors(
+            color = Color(0xFFF5F5F5),
+            backgroundColor = Color.Transparent
+        )
+    )
+)
 ```
 
 ### Automatic Line Wrapping

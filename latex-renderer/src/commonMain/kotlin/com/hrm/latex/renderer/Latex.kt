@@ -55,6 +55,7 @@ import com.hrm.latex.renderer.model.LatexConfig
 import com.hrm.latex.renderer.model.LineBreakingConfig
 import com.hrm.latex.renderer.model.RenderContext
 import com.hrm.latex.renderer.model.defaultLatexFontFamilies
+import com.hrm.latex.renderer.model.resolveThemeColors
 import com.hrm.latex.renderer.model.toContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -73,8 +74,10 @@ private const val TAG = "Latex"
  *
  * @param latex LaTeX 字符串（支持增量输入，会自动解析可解析部分）
  * @param modifier 修饰符
- * @param config 渲染样式（包含颜色、背景色、深浅色模式配置、字体大小等）
- * @param isDarkTheme 是否为深色模式（默认跟随系统）
+ * @param config 渲染配置（包含主题、字体大小等）
+ * @param isDarkTheme 当前环境是否为深色模式。
+ * 仅在 `config.theme = LatexTheme.auto(...)` 时用于选择 light/dark 色板；
+ * 固定主题和 `LatexTheme.material3()` 会直接使用 theme 中的颜色。
  */
 @Composable
 fun Latex(
@@ -83,12 +86,7 @@ fun Latex(
     config: LatexConfig = LatexConfig(),
     isDarkTheme: Boolean = isSystemInDarkTheme()
 ) {
-    // 确定最终背景颜色
-    val resolvedBackgroundColor = if (isDarkTheme) {
-        config.darkBackgroundColor
-    } else {
-        config.backgroundColor
-    }
+    val resolvedThemeColors = config.resolveThemeColors(isDarkTheme)
 
     // ── OTF 字体异步加载（FontResource 方式）──
     // 当用户通过 MathFont.OTF(fontResource) 配置时，bytes 在此处异步加载。
@@ -170,7 +168,7 @@ fun Latex(
         children = document.children,
         context = context,
         highlightRanges = config.highlight.ranges,
-        backgroundColor = resolvedBackgroundColor,
+        backgroundColor = resolvedThemeColors.backgroundColor,
         contentDescription = accessibilityDescription,
         onNodeClick = config.onNodeClick,
         onHyperlinkClick = config.onHyperlinkClick,
@@ -180,16 +178,16 @@ fun Latex(
 }
 
 /**
- * latex renderer with automatic line breaking based on container width
+ * 自动换行的 LaTeX 渲染组件。
  *
- * this composable automatically wraps long equations to fit within the parent container.
- * line breaks occur at logical points: after relation symbols (=, <, >) and
- * binary operators (+, -, ×).
+ * 该组件会根据父容器宽度自动包装长公式。
+ * 换行优先发生在关系运算符（`=`、`<`、`>`）和二元运算符（`+`、`-`、`×`）之后。
  *
- * @param latex latex string (supports incremental input)
- * @param modifier modifier
- * @param config rendering configuration (font size, colors, etc.)
- * @param isDarkTheme dark theme flag (defaults to system setting)
+ * @param latex LaTeX 字符串（支持增量输入）
+ * @param modifier 修饰符
+ * @param config 渲染配置（包含主题、字体大小等）
+ * @param isDarkTheme 当前环境是否为深色模式。
+ * 仅在 `config.theme = LatexTheme.auto(...)` 时参与主题解析。
  */
 @Composable
 fun LatexAutoWrap(

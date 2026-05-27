@@ -41,7 +41,7 @@ import com.hrm.latex.renderer.editor.LatexEditor
 import com.hrm.latex.renderer.editor.LatexTemplate
 import com.hrm.latex.renderer.editor.rememberEditorState
 import com.hrm.latex.renderer.model.LatexConfig
-
+import com.hrm.latex.renderer.model.LatexTheme
 /**
  * 编辑器预览分组
  */
@@ -89,10 +89,11 @@ val editorPreviewGroups: List<PreviewGroup> = listOf(
 @Composable
 private fun EditorEmptyPreview() {
     val state = rememberEditorState("")
+    val config = LatexConfig(theme = LatexTheme.material3())
     LatexEditor(
         editorState = state,
         modifier = Modifier.fillMaxWidth().padding(8.dp),
-        config = LatexConfig()
+        config = config
     )
 }
 
@@ -100,10 +101,11 @@ private fun EditorEmptyPreview() {
 @Composable
 private fun EditorSimplePreview() {
     val state = rememberEditorState("x^2 + y^2 = z^2")
+    val config = LatexConfig(theme = LatexTheme.material3())
     LatexEditor(
         editorState = state,
         modifier = Modifier.fillMaxWidth().padding(8.dp),
-        config = LatexConfig()
+        config = config
     )
 }
 
@@ -111,10 +113,11 @@ private fun EditorSimplePreview() {
 @Composable
 private fun EditorComplexPreview() {
     val state = rememberEditorState("\\int_{0}^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}")
+    val config = LatexConfig(theme = LatexTheme.material3())
     LatexEditor(
         editorState = state,
         modifier = Modifier.fillMaxWidth().padding(8.dp),
-        config = LatexConfig()
+        config = config
     )
 }
 
@@ -122,6 +125,7 @@ private fun EditorComplexPreview() {
 @Composable
 private fun EditorTemplatePreview() {
     val state = rememberEditorState("f(x) = ")
+    val config = LatexConfig(theme = LatexTheme.material3())
 
     Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
         Text(
@@ -151,7 +155,7 @@ private fun EditorTemplatePreview() {
 
         LatexEditor(
             editorState = state,
-            config = LatexConfig()
+            config = config
         )
     }
 }
@@ -160,10 +164,11 @@ private fun EditorTemplatePreview() {
 @Composable
 private fun EditorSourcePreview() {
     val state = rememberEditorState("\\frac{a}{b}")
+    val config = LatexConfig(theme = LatexTheme.material3())
     LatexEditor(
         editorState = state,
         modifier = Modifier.fillMaxWidth().padding(8.dp),
-        config = LatexConfig(),
+        config = config,
         showSourceText = true
     )
 }

@@ -43,6 +43,7 @@ import com.hrm.latex.renderer.LatexTransition
 import com.hrm.latex.renderer.model.HighlightConfig
 import com.hrm.latex.renderer.model.HighlightRange
 import com.hrm.latex.renderer.model.LatexConfig
+import com.hrm.latex.renderer.model.LatexTheme
 import kotlinx.coroutines.delay
 
 /**
@@ -562,11 +563,11 @@ val basicLatexPreviewGroups = listOf(
                     Latex(
                         latex = "\\href{https://example.com}{点击这里}",
                         config = LatexConfig(
+                            theme = LatexTheme.light(),
                             onHyperlinkClick = { url ->
                                 println("超链接被点击: $url")
                             }
-                        ),
-                        isDarkTheme = false
+                        )
                     )
                 }
             ),
@@ -578,6 +579,7 @@ val basicLatexPreviewGroups = listOf(
                     Latex(
                         latex = "E = mc^2",
                         config = LatexConfig(
+                            theme = LatexTheme.light(),
                             highlight = HighlightConfig(
                                 ranges = listOf(
                                     HighlightRange(
@@ -587,8 +589,7 @@ val basicLatexPreviewGroups = listOf(
                                     )
                                 )
                             )
-                        ),
-                        isDarkTheme = false
+                        )
                     )
                 }
             ),
@@ -598,6 +599,7 @@ val basicLatexPreviewGroups = listOf(
                     Latex(
                         latex = "\\frac{a+b}{c} + x^2",
                         config = LatexConfig(
+                            theme = LatexTheme.light(),
                             highlight = HighlightConfig(
                                 ranges = listOf(
                                     HighlightRange(
@@ -607,8 +609,7 @@ val basicLatexPreviewGroups = listOf(
                                     )
                                 )
                             )
-                        ),
-                        isDarkTheme = false
+                        )
                     )
                 }
             ),
@@ -618,6 +619,7 @@ val basicLatexPreviewGroups = listOf(
                     Latex(
                         latex = "a + b + c + d",
                         config = LatexConfig(
+                            theme = LatexTheme.light(),
                             highlight = HighlightConfig(
                                 ranges = listOf(
                                     HighlightRange(
@@ -630,8 +632,7 @@ val basicLatexPreviewGroups = listOf(
                                     )
                                 )
                             )
-                        ),
-                        isDarkTheme = false
+                        )
                     )
                 }
             ),
@@ -1101,11 +1102,11 @@ val basicLatexPreviewGroups = listOf(
                     }
                     AnimatedLatex(
                         latex = formulas[index],
+                        config = LatexConfig(theme = LatexTheme.light()),
                         animationConfig = LatexAnimationConfig(
                             transition = LatexTransition.CROSSFADE,
                             durationMillis = 500
-                        ),
-                        isDarkTheme = false
+                        )
                     )
                 }
             ),
@@ -1123,11 +1124,11 @@ val basicLatexPreviewGroups = listOf(
                     }
                     AnimatedLatex(
                         latex = formulas[index],
+                        config = LatexConfig(theme = LatexTheme.light()),
                         animationConfig = LatexAnimationConfig(
                             transition = LatexTransition.SLIDE_UP,
                             durationMillis = 400
-                        ),
-                        isDarkTheme = false
+                        )
                     )
                 }
             ),
@@ -1144,11 +1145,11 @@ val basicLatexPreviewGroups = listOf(
                     }
                     AnimatedLatex(
                         latex = formulas[index],
+                        config = LatexConfig(theme = LatexTheme.light()),
                         animationConfig = LatexAnimationConfig(
                             transition = LatexTransition.SLIDE_DOWN,
                             durationMillis = 400
-                        ),
-                        isDarkTheme = false
+                        )
                     )
                 }
             ),
@@ -1169,11 +1170,11 @@ val basicLatexPreviewGroups = listOf(
                     }
                     AnimatedLatex(
                         latex = formulas[index],
+                        config = LatexConfig(theme = LatexTheme.light()),
                         animationConfig = LatexAnimationConfig(
                             transition = LatexTransition.FADE_SLIDE,
                             durationMillis = 600
-                        ),
-                        isDarkTheme = false
+                        )
                     )
                 }
             ),
@@ -1192,15 +1193,58 @@ val basicLatexPreviewGroups = listOf(
                         LatexTransition.entries.forEach { transition ->
                             AnimatedLatex(
                                 latex = formulas[index],
+                                config = LatexConfig(theme = LatexTheme.light()),
                                 animationConfig = LatexAnimationConfig(
                                     transition = transition,
                                     durationMillis = 400
-                                ),
-                                isDarkTheme = false
+                                )
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
+                }
+            ),
+        )
+    ),
+    PreviewGroup(
+        id = "themes",
+        title = "24. 主题模式",
+        description = "Auto、Light、Dark 与 Material3 主题适配",
+        items = listOf(
+            PreviewItem(
+                "1", "Auto 跟随系统", "E = mc^2",
+                content = {
+                    Latex(
+                        latex = "E = mc^2",
+                        config = LatexConfig(theme = LatexTheme.auto())
+                    )
+                }
+            ),
+            PreviewItem(
+                "2", "固定浅色主题", "\\frac{a+b}{c+d}",
+                content = {
+                    Latex(
+                        latex = "\\frac{a+b}{c+d}",
+                        config = LatexConfig(theme = LatexTheme.light())
+                    )
+                }
+            ),
+            PreviewItem(
+                "3", "固定深色主题", "\\int_0^1 x^2 dx = \\frac{1}{3}",
+                content = {
+                    Latex(
+                        latex = "\\int_0^1 x^2 dx = \\frac{1}{3}",
+                        config = LatexConfig(theme = LatexTheme.dark())
+                    )
+                }
+            ),
+            PreviewItem(
+                "4", "Material3 当前主题", "\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}",
+                content = {
+                    Latex(
+                        latex = "\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}",
+                        config = LatexConfig(theme = LatexTheme.material3())
+                    )
                 }
             ),
         )

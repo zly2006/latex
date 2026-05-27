@@ -47,6 +47,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hrm.latex.parser.LatexParser
 import com.hrm.latex.renderer.Latex
+import com.hrm.latex.renderer.model.LatexConfig
+import com.hrm.latex.renderer.model.LatexTheme
 import kotlinx.coroutines.delay
 
 /**
@@ -61,6 +63,7 @@ fun Preview_Demo_RealTimeInput() {
         var debugInfo by remember { mutableStateOf("") }
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val latexConfig = LatexConfig(theme = LatexTheme.material3())
             Text("模拟用户输入:", style = MaterialTheme.typography.bodyMedium)
             Text(
                 text = userInput.ifEmpty { "(正在输入...)" },
@@ -79,7 +82,7 @@ fun Preview_Demo_RealTimeInput() {
             Text("实时渲染结果:", style = MaterialTheme.typography.bodyMedium)
             Latex(
                 latex = userInput,
-                isDarkTheme = false,
+                config = latexConfig,
             )
 
             // 模拟用户逐步输入
@@ -115,6 +118,7 @@ fun Preview_Demo_ProgressTracking() {
         val progress = if (formula.isEmpty()) 0f else currentText.length.toFloat() / formula.length
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val latexConfig = LatexConfig(theme = LatexTheme.material3())
             // 进度条
             LinearProgressIndicator(
                 progress = { progress },
@@ -134,7 +138,7 @@ fun Preview_Demo_ProgressTracking() {
             // 渲染结果
             Latex(
                 latex = currentText,
-                isDarkTheme = false
+                config = latexConfig
             )
 
             // 模拟流式输入并更新进度
@@ -163,6 +167,7 @@ fun Preview_Demo_ErrorRecovery() {
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            val latexConfig = LatexConfig(theme = LatexTheme.material3())
             testCases.forEach { (label, latex) ->
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
@@ -183,7 +188,7 @@ fun Preview_Demo_ErrorRecovery() {
                         Box(modifier = Modifier.padding(8.dp)) {
                             Latex(
                                 latex = latex,
-                                isDarkTheme = false
+                                config = latexConfig
                             )
                         }
                     }
@@ -211,6 +216,7 @@ fun Preview_Demo_MultipleFormulas() {
         var currentIndices by remember { mutableStateOf(List(formulas.size) { 0 }) }
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            val latexConfig = LatexConfig(theme = LatexTheme.material3())
             formulas.forEachIndexed { index, (title, fullFormula) ->
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
@@ -221,7 +227,7 @@ fun Preview_Demo_MultipleFormulas() {
 
                     Latex(
                         latex = fullFormula.substring(0, currentIndices[index]),
-                        isDarkTheme = false
+                        config = latexConfig
                     )
                 }
             }
@@ -250,6 +256,7 @@ fun Preview_Demo_ComparisonWithStandard() {
         var incrementalText by remember { mutableStateOf("") }
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            val latexConfig = LatexConfig(theme = LatexTheme.material3())
             // 标准渲染（完整公式）
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
@@ -265,7 +272,7 @@ fun Preview_Demo_ComparisonWithStandard() {
                     Box(modifier = Modifier.padding(8.dp)) {
                         Latex(
                             latex = formula,
-                            isDarkTheme = false
+                            config = latexConfig
                         )
                     }
                 }
@@ -294,7 +301,7 @@ fun Preview_Demo_ComparisonWithStandard() {
                     Box(modifier = Modifier.padding(8.dp)) {
                         Latex(
                             latex = incrementalText,
-                            isDarkTheme = false
+                            config = latexConfig
                         )
                     }
                 }

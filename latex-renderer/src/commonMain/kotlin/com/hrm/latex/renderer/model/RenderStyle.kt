@@ -23,6 +23,9 @@
 
 package com.hrm.latex.renderer.model
 
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -36,6 +39,7 @@ import com.hrm.latex.renderer.font.MathFontProvider
 import com.hrm.latex.renderer.font.MathFontProviderFactory
 import com.hrm.latex.renderer.utils.MathConstants
 import com.hrm.latex.renderer.utils.parseColor
+import kotlin.ConsistentCopyVisibility
 
 /**
  * 子表达式高亮配置
@@ -67,14 +71,107 @@ data class HighlightRange(
 )
 
 /**
- * LaTeX 渲染配置（用户外部设置）
+ * LaTeX 单一色板。
+ */
+data class LatexThemeColors(
+    val color: Color,
+    val backgroundColor: Color = Color.Transparent
+)
+
+/**
+ * LaTeX 主题。
+ */
+sealed interface LatexTheme {
+    @ConsistentCopyVisibility
+    data class Adaptive internal constructor(
+        internal val light: LatexThemeColors,
+        internal val dark: LatexThemeColors
+    ) : LatexTheme
+
+    @ConsistentCopyVisibility
+    data class Fixed internal constructor(
+        internal val colors: LatexThemeColors
+    ) : LatexTheme
+
+    companion object {
+        internal val DefaultLightColors = LatexThemeColors(
+            color = Color.Black,
+            backgroundColor = Color.Transparent
+        )
+
+        internal val DefaultDarkColors = LatexThemeColors(
+            color = Color.White,
+            backgroundColor = Color.Transparent
+        )
+
+        fun auto(
+            light: LatexThemeColors = DefaultLightColors,
+            dark: LatexThemeColors = DefaultDarkColors
+        ): LatexTheme = Adaptive(
+            light = light,
+            dark = dark
+        )
+
+        fun light(
+            color: Color = DefaultLightColors.color,
+            backgroundColor: Color = DefaultLightColors.backgroundColor
+        ): LatexTheme = Fixed(
+            colors = LatexThemeColors(
+                color = color,
+                backgroundColor = backgroundColor
+            )
+        )
+
+        fun dark(
+            color: Color = DefaultDarkColors.color,
+            backgroundColor: Color = DefaultDarkColors.backgroundColor
+        ): LatexTheme = Fixed(
+            colors = LatexThemeColors(
+                color = color,
+                backgroundColor = backgroundColor
+            )
+        )
+
+        /**
+         * 将 Material 3 当前 [ColorScheme] 映射为固定的 LaTeX 主题。
+         */
+        fun material3(colorScheme: ColorScheme): LatexTheme = Fixed(
+            colors = LatexThemeColors(
+                color = colorScheme.onSurface,
+                backgroundColor = colorScheme.surface
+            )
+        )
+
+        /**
+         * 使用当前 Compose Material 3 [MaterialTheme.colorScheme] 生成 LaTeX 主题。
+         *
+         * 这会让 LaTeX 的前景色和背景色跟随当前 Material 3 主题。
+         */
+        @Composable
+        fun material3(): LatexTheme = material3(MaterialTheme.colorScheme)
+    }
+}
+
+/**
+ * LaTeX 渲染配置（用户外部设置）。
+ *
+ * 主题统一通过 [theme] 控制，推荐使用以下入口：
+ * - [LatexTheme.auto]：跟随当前环境的深浅色
+ * - [LatexTheme.light]：固定浅色主题
+ * - [LatexTheme.dark]：固定深色主题
+ * - [LatexTheme.material3]：跟随当前 Material 3 `ColorScheme`
+ *
+ * 使用示例：
+ * ```kotlin
+ * LatexConfig(theme = LatexTheme.auto())
+ * LatexConfig(theme = LatexTheme.light())
+ * LatexConfig(theme = LatexTheme.dark())
+ * LatexConfig(theme = LatexTheme.material3())
+ * ```
  */
 data class LatexConfig(
     val fontSize: TextUnit = 20.sp,
-    val color: Color = Color.Black,
-    val darkColor: Color = Color.White,
-    val backgroundColor: Color = Color.Transparent,
-    val darkBackgroundColor: Color = Color.Transparent,
+    val theme: LatexTheme = LatexTheme.auto(),
     val lineBreaking: LineBreakingConfig = LineBreakingConfig(),
     val highlight: HighlightConfig = HighlightConfig(),
     val accessibilityEnabled: Boolean = false,
@@ -293,7 +390,7 @@ internal data class RenderContext(
 /**
  * 从外部配置创建初始上下文
  *
- * @param isDark 是否深色模式
+ * @param isDark 当前环境是否为深色模式，仅在 `LatexTheme.auto(...)` 时参与主题解析
  * @param fontFamilies 已解析的字体家族（由调用方通过 mathFont.fontFamiliesOrNull() ?: defaultLatexFontFamilies() 提供）
  * @param provider 预创建的 MathFontProvider（由调用方缓存，避免每次重组创建新实例）
  */
@@ -302,10 +399,11 @@ internal fun LatexConfig.toContext(
     fontFamilies: LatexFontFamilies,
     provider: MathFontProvider? = null
 ): RenderContext {
-    val resolvedColor = if (isDark) {
-        if (darkColor != Color.Unspecified) darkColor else Color.White
-    } else {
-        if (color != Color.Unspecified) color else Color.Black
+    val resolvedTheme = theme.resolve(isDark)
+    val resolvedColor = when {
+        resolvedTheme.color != Color.Unspecified -> resolvedTheme.color
+        isDark -> LatexTheme.DefaultDarkColors.color
+        else -> LatexTheme.DefaultLightColors.color
     }
 
     val resolvedErrorColor = if (isDark) Color(0xFFFF6666) else Color(0xFFCC0000)
@@ -331,6 +429,13 @@ internal fun LatexConfig.toContext(
         mathFontProvider = resolvedProvider
     )
 }
+
+internal fun LatexTheme.resolve(systemInDarkTheme: Boolean): LatexThemeColors = when (this) {
+    is LatexTheme.Adaptive -> if (systemInDarkTheme) dark else light
+    is LatexTheme.Fixed -> colors
+}
+
+internal fun LatexConfig.resolveThemeColors(isDark: Boolean): LatexThemeColors = theme.resolve(isDark)
 
 internal fun RenderContext.textStyle(): TextStyle = cachedTextStyle
 
