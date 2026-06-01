@@ -28,6 +28,7 @@ import com.hrm.latex.parser.model.LatexNode
  * 空格命令：\,  \:  \;  \quad  \qquad  \!  \hspace
  */
 internal fun CommandRegistry.installSpaceHandlers() {
+    register(" ") { _, _, _ -> LatexNode.Space(LatexNode.Space.SpaceType.NORMAL) }
     register(",") { _, _, _ -> LatexNode.Space(LatexNode.Space.SpaceType.THIN) }
     register(":") { _, _, _ -> LatexNode.Space(LatexNode.Space.SpaceType.MEDIUM) }
     register(";") { _, _, _ -> LatexNode.Space(LatexNode.Space.SpaceType.THICK) }

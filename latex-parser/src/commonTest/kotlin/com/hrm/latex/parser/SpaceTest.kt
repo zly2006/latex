@@ -26,6 +26,8 @@ package com.hrm.latex.parser
 import com.hrm.latex.parser.model.LatexNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class SpaceTest {
@@ -90,5 +92,21 @@ class SpaceTest {
         // Test negative
         val res3 = parser.parse("\\hspace{-5mm}")
         assertEquals("-5mm", (res3.children.first() as LatexNode.HSpace).dimension)
+    }
+
+    @Test
+    fun should_parse_escaped_space_before_superscript_without_unknown_command() {
+        val parser = LatexParser()
+
+        val result = parser.parse("–10\\ ^\\circ\\mathrm{C}.")
+        val children = result.children
+
+        assertFalse(children.any { it is LatexNode.Command && it.name.isEmpty() })
+
+        val degree = children.firstOrNull { it is LatexNode.Superscript }
+        assertIs<LatexNode.Superscript>(degree)
+        assertIs<LatexNode.Space>(degree.base)
+        val exponent = assertIs<LatexNode.Symbol>(degree.exponent)
+        assertEquals("circ", exponent.symbol)
     }
 }

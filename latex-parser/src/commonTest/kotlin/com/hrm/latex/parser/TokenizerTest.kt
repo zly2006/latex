@@ -224,6 +224,16 @@ class TokenizerTest {
         assertEquals(2, wsTokens.size)
     }
 
+    @Test
+    fun testEscapedSpaceIsTokenizedAsSpaceCommand() {
+        val tokenizer = LatexTokenizer("–10\\ ^\\circ")
+        val tokens = tokenizer.tokenize()
+
+        val commands = tokens.filterIsInstance<LatexToken.Command>()
+        assertEquals(listOf(" ", "circ"), commands.map { it.name })
+        assertTrue(tokens.none { it is LatexToken.Whitespace && it.range.start == 4 && it.range.end == 5 })
+    }
+
     // ========== 注释处理 (%) ==========
 
     @Test

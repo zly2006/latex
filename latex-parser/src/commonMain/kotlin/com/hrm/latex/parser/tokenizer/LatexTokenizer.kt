@@ -199,8 +199,13 @@ class LatexTokenizer(private val input: String, startOffset: Int = 0) {
             if (char != null && !char.isWhitespace()) {
                 advance()
                 tokens.add(LatexToken.Command(char.toString(), SourceRange(start, position)))
+            } else if (char != null) {
+                // \ 代表显式空格命令。这里消费该空白字符，避免后续生成额外 Whitespace token，
+                // 否则会在 AST / 渲染层留下一个未知空命令节点。
+                advance()
+                tokens.add(LatexToken.Command(" ", SourceRange(start, position)))
             } else {
-                // \ 后跟 EOF 或空白 — 产生一个空命令 token 以确保反斜杠位置被覆盖。
+                // \ 后跟 EOF — 产生一个空命令 token 以确保反斜杠位置被覆盖。
                 // 对增量分词至关重要：如果此处不产生 token，反斜杠的位置会成为"空洞"，
                 // 后续追加的字符（如 \+i → \i）不会被正确关联为 Command token。
                 tokens.add(LatexToken.Command("", SourceRange(start, position)))
