@@ -31,10 +31,10 @@ import org.jetbrains.compose.resources.FontResource
  *
  * 使用示例：
  * ```kotlin
- * // 方式 1：默认 — 内置 Latin Modern Math OTF（高精度排版，推荐）
+ * // 方式 1：默认 — 使用系统字体降级，宿主可另行传入下载后的字体
  * LatexConfig()
  *
- * // 方式 2：使用内置 KaTeX TTF 字体集
+ * // 方式 2：使用兼容降级字体集
  * LatexConfig(mathFont = MathFont.KaTeXTTF)
  *
  * // 方式 3：使用自定义 OTF 字体（传入 FontResource，内部异步加载）
@@ -52,18 +52,15 @@ import org.jetbrains.compose.resources.FontResource
 sealed class MathFont {
 
     /**
-     * 使用内置的 Latin Modern Math OTF 字体（默认行为）。
+     * 默认字体入口。
      *
-     * 内部自动异步加载 `latinmodern-math.otf` 字体文件：
-     * - 加载前先用 KaTeX TTF 降级渲染
-     * - 加载完成后自动重组升级到 OTF 高精度排版
-     *
-     * 用户无需处理任何异步逻辑，开箱即用。
+     * zly2006 fork 移除了内置字体资源，默认使用系统字体降级。
+     * 宿主可通过 [OTF] 或 [TTF] 显式传入下载后的字体。
      */
     data object Default : MathFont()
 
     /**
-     * 使用内置的 KaTeX TTF 字体集。
+     * 使用兼容降级字体集。
      *
      * 适用于不需要 OTF MATH 表高精度排版的场景，
      * 或需要保持与旧版本行为一致的场景。
