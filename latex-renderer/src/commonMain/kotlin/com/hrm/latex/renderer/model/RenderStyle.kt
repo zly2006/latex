@@ -178,17 +178,17 @@ data class LatexConfig(
     /**
      * 数学字体配置（唯一的字体入口）。决定排版参数和字体的来源。
      *
-     * - [MathFont.Default]：使用内置 Latin Modern Math OTF 字体（高精度排版，推荐）
-     * - [MathFont.KaTeXTTF]：使用内置 KaTeX TTF 字体集
+     * - [MathFont.Default]：使用系统字体降级，宿主可另行传入下载后的字体
+     * - [MathFont.KaTeXTTF]：使用兼容降级字体集
      * - [MathFont.OTF]：使用自定义的带 MATH 表的 OTF 字体
      * - [MathFont.TTF]：使用自定义的 TTF 字体集
      *
      * 使用示例：
      * ```kotlin
-     * // 默认 — 内置 Latin Modern Math OTF（推荐）
+     * // 默认 — 系统字体降级
      * LatexConfig()
      *
-     * // 使用内置 KaTeX TTF 字体集
+     * // 使用兼容降级字体集
      * LatexConfig(mathFont = MathFont.KaTeXTTF)
      *
      * // 使用自定义 OTF 字体（传入 FontResource，内部异步加载）
