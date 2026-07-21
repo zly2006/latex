@@ -327,12 +327,17 @@ x^{\sum_{i=1}^{n}}
 - ✅ `\qquad` 双quad空格 (2 em)
 - ✅ 普通空格
 - ✅ `\!` 负空格
+- ✅ `\space`, `\thinspace`, `\medspace`, `\thickspace` 命名空格
+- ✅ `\enspace`, `\enskip` 半方空格
+- ✅ `\negthinspace`, `\negmedspace`, `\negthickspace` 负空格
+- ✅ `\>` 中等空格别名
 - ✅ `\hspace{1cm}` 自定义空格
+- ✅ `\{`, `\}`, `\$`, `\%`, `\#`, `\&`, `\_`, `\|` 转义特殊字符
     
 ### ❌ 缺失
 - 无
     
-**覆盖率**: 8/8 (100%)
+**覆盖率**: 13/13 (100%)
 
 ---
 
