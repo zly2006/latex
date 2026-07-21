@@ -95,6 +95,47 @@ class SpaceTest {
     }
 
     @Test
+    fun should_parse_common_spacing_aliases() {
+        val parser = LatexParser()
+        val spaceAliases = listOf(
+            "\\ " to LatexNode.Space.SpaceType.NORMAL,
+            "\\space" to LatexNode.Space.SpaceType.NORMAL,
+            "\\," to LatexNode.Space.SpaceType.THIN,
+            "\\thinspace" to LatexNode.Space.SpaceType.THIN,
+            "\\:" to LatexNode.Space.SpaceType.MEDIUM,
+            "\\>" to LatexNode.Space.SpaceType.MEDIUM,
+            "\\medspace" to LatexNode.Space.SpaceType.MEDIUM,
+            "\\;" to LatexNode.Space.SpaceType.THICK,
+            "\\thickspace" to LatexNode.Space.SpaceType.THICK,
+            "\\quad" to LatexNode.Space.SpaceType.QUAD,
+            "\\qquad" to LatexNode.Space.SpaceType.QQUAD,
+            "\\!" to LatexNode.Space.SpaceType.NEGATIVE_THIN,
+            "\\negthinspace" to LatexNode.Space.SpaceType.NEGATIVE_THIN
+        )
+
+        spaceAliases.forEach { (command, expectedType) ->
+            val node = assertIs<LatexNode.Space>(parser.parse(command).children.single())
+            assertEquals(expectedType, node.type, command)
+        }
+    }
+
+    @Test
+    fun should_parse_extended_spacing_commands() {
+        val parser = LatexParser()
+        val dimensions = listOf(
+            "\\enspace" to "0.5em",
+            "\\enskip" to "0.5em",
+            "\\negmedspace" to "-0.222em",
+            "\\negthickspace" to "-0.277em"
+        )
+
+        dimensions.forEach { (command, expectedDimension) ->
+            val node = assertIs<LatexNode.HSpace>(parser.parse(command).children.single())
+            assertEquals(expectedDimension, node.dimension, command)
+        }
+    }
+
+    @Test
     fun should_parse_escaped_space_before_superscript_without_unknown_command() {
         val parser = LatexParser()
 
