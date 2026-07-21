@@ -115,7 +115,7 @@
 <details>
 <summary><b>空格控制</b></summary>
 
-`\,`, `\:`, `\;`, `\quad`, `\qquad`, `\!`, `\hspace{...}`, 普通空格
+`\ `、`\space`、`\,`、`\thinspace`、`\:`、`\>`、`\medspace`、`\;`、`\thickspace`、`\quad`、`\qquad`、`\!`、`\negthinspace`、`\enspace`、`\enskip`、`\negmedspace`、`\negthickspace`、`\hspace{...}`、普通空格；同时支持 `\{`、`\}`、`\$`、`\%`、`\#`、`\&`、`\_`、`\|` 等特殊字符转义。
 </details>
 
 <details>

@@ -303,6 +303,16 @@ object SymbolMap {
         "lbrace" to "{",
         "rbrace" to "}",
 
+        // TeX special characters written as control symbols
+        "{" to "{",
+        "}" to "}",
+        "$" to "$",
+        "%" to "%",
+        "#" to "#",
+        "&" to "&",
+        "_" to "_",
+        "|" to "‖",
+
         // 额外定界符
         "lgroup" to "⟮",
         "rgroup" to "⟯",

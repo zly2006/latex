@@ -115,7 +115,7 @@ A high-performance LaTeX mathematical formula parsing and rendering library deve
 <details>
 <summary><b>Spacing</b></summary>
 
-`\,`, `\:`, `\;`, `\quad`, `\qquad`, `\!`, `\hspace{...}`, normal spaces
+`\ `, `\space`, `\,`, `\thinspace`, `\:`, `\>`, `\medspace`, `\;`, `\thickspace`, `\quad`, `\qquad`, `\!`, `\negthinspace`, `\enspace`, `\enskip`, `\negmedspace`, `\negthickspace`, `\hspace{...}`, normal spaces. Escaped special characters such as `\{`, `\}`, `\$`, `\%`, `\#`, `\&`, `\_`, and `\|` are also supported.
 </details>
 
 <details>
