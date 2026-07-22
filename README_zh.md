@@ -28,9 +28,9 @@
 ## 📐 已支持的 LaTeX 功能（378+）
 
 <details>
-<summary><b>数学公式</b> — 分数、根号、二项式</summary>
+<summary><b>数学公式</b> — 分数、根号、二项式、上下标</summary>
 
-`\frac`, `\dfrac`, `\tfrac`, `\cfrac`, `\binom`, `\tbinom`, `\dbinom`, `\sqrt`, `\sqrt[n]{x}`
+`\frac`, `\dfrac`, `\tfrac`, `\cfrac`, `\binom`, `\tbinom`, `\dbinom`, `\sqrt`, `\sqrt[n]{x}`, `x_i`, `x^2`。无花括号上下标严格只消费一个字符，因此 `a_ib_jx^{i+j}` 会解析为 `a_i b_j x^{i+j}`。
 </details>
 
 <details>

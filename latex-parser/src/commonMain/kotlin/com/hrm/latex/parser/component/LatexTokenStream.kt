@@ -29,7 +29,10 @@ import com.hrm.latex.parser.tokenizer.LatexToken
 /**
  * 封装 Token 流的操作，如 peek, advance, expect
  */
-class LatexTokenStream(private val tokens: List<LatexToken>) {
+class LatexTokenStream(private val initialTokens: List<LatexToken>) {
+    private var mutableTokens: MutableList<LatexToken>? = null
+    private val tokens: List<LatexToken>
+        get() = mutableTokens ?: initialTokens
     private var position = 0
 
     fun peek(offset: Int = 0): LatexToken? {
@@ -55,6 +58,44 @@ class LatexTokenStream(private val tokens: List<LatexToken>) {
         val token = peek()
         position++
         return token
+    }
+
+    /**
+     * 消费当前文本 token 的一个 Unicode 字符。
+     *
+     * TeX 的无花括号上下标只消费后面的一个 token；普通文本在分词阶段会合并，
+     * 因此解析上下标时需要从合并后的文本 token 中仅取出第一个字符。
+     */
+    internal fun consumeTextAtom(): LatexToken.Text? {
+        val token = peek() as? LatexToken.Text ?: return null
+        val atomLength = if (
+            token.content.length > 1 &&
+            token.content[0].isHighSurrogate() &&
+            token.content[1].isLowSurrogate()
+        ) {
+            2
+        } else {
+            1
+        }
+        val atomEnd = token.range.start + atomLength
+        val atom = LatexToken.Text(
+            token.content.substring(0, atomLength),
+            SourceRange(token.range.start, atomEnd)
+        )
+
+        if (atomLength < token.content.length) {
+            val editableTokens = mutableTokens ?: initialTokens.toMutableList().also { mutableTokens = it }
+            editableTokens[position] = atom
+            editableTokens.add(
+                position + 1,
+                LatexToken.Text(
+                    token.content.substring(atomLength),
+                    SourceRange(atomEnd, token.range.end)
+                )
+            )
+        }
+        advance()
+        return atom
     }
 
     fun isEOF(): Boolean {

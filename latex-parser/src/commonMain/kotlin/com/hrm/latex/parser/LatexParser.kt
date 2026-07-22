@@ -290,6 +290,10 @@ internal class ParseSession(
     private fun parseScriptContent(): LatexNode {
         return when (tokenStream.peek()) {
             is LatexToken.LeftBrace -> parseGroup()
+            is LatexToken.Text -> {
+                val token = tokenStream.consumeTextAtom() ?: return LatexNode.Text("")
+                LatexNode.Text(token.content, sourceRange = token.range)
+            }
             else -> parseFactor() ?: LatexNode.Text("")
         }
     }

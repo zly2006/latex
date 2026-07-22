@@ -28,9 +28,9 @@ A high-performance LaTeX mathematical formula parsing and rendering library deve
 ## 📐 Supported LaTeX Features (378+)
 
 <details>
-<summary><b>Math Formulas</b> — fractions, roots, binomials</summary>
+<summary><b>Math Formulas</b> — fractions, roots, binomials, scripts</summary>
 
-`\frac`, `\dfrac`, `\tfrac`, `\cfrac`, `\binom`, `\tbinom`, `\dbinom`, `\sqrt`, `\sqrt[n]{x}`
+`\frac`, `\dfrac`, `\tfrac`, `\cfrac`, `\binom`, `\tbinom`, `\dbinom`, `\sqrt`, `\sqrt[n]{x}`, `x_i`, `x^2`. Unbraced scripts consume exactly one character, so `a_ib_jx^{i+j}` is parsed as `a_i b_j x^{i+j}`.
 </details>
 
 <details>
