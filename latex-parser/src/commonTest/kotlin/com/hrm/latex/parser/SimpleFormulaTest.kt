@@ -24,8 +24,10 @@
 package com.hrm.latex.parser
 
 import com.hrm.latex.parser.model.LatexNode
+import com.hrm.latex.parser.model.SourceRange
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -194,6 +196,34 @@ class SimpleFormulaTest {
         // subscript index should be "k"
         assertTrue(sub.index is LatexNode.Text)
         assertEquals("k", (sub.index as LatexNode.Text).content)
+    }
+
+    @Test
+    fun unbracedScriptsConsumeOnlyOneCharacter() {
+        val doc = parser.parse("a_ib_jx^{i+j}")
+
+        assertEquals(3, doc.children.size)
+
+        val a = assertIs<LatexNode.Subscript>(doc.children[0])
+        assertEquals(SourceRange(0, 3), a.sourceRange)
+        assertEquals("a", assertIs<LatexNode.Text>(a.base).content)
+        assertEquals("i", assertIs<LatexNode.Text>(a.index).content)
+
+        val b = assertIs<LatexNode.Subscript>(doc.children[1])
+        assertEquals(SourceRange(3, 6), b.sourceRange)
+        assertEquals("b", assertIs<LatexNode.Text>(b.base).content)
+        assertEquals("j", assertIs<LatexNode.Text>(b.index).content)
+
+        val x = assertIs<LatexNode.Superscript>(doc.children[2])
+        assertEquals(SourceRange(6, 13), x.sourceRange)
+        assertEquals("x", assertIs<LatexNode.Text>(x.base).content)
+        val exponent = assertIs<LatexNode.Group>(x.exponent)
+        assertEquals(listOf("i", "+", "j"), exponent.children.map { assertIs<LatexNode.Text>(it).content })
+
+        val unicodeDoc = parser.parse("x_😀y")
+        val unicodeSubscript = assertIs<LatexNode.Subscript>(unicodeDoc.children[0])
+        assertEquals("😀", assertIs<LatexNode.Text>(unicodeSubscript.index).content)
+        assertEquals("y", assertIs<LatexNode.Text>(unicodeDoc.children[1]).content)
     }
     
     @Test
