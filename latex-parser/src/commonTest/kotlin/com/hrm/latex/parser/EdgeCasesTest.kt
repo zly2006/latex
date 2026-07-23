@@ -112,13 +112,19 @@ class EdgeCasesTest {
     
     @Test
     fun testSpecialCharactersEscaped() {
-        val doc = parser.parse("\\{ \\} \\$ \\% \\# \\& \\_ \\|")
+        val doc = parser.parse("\\{ \\} \\$ \\% \\# \\& \\_")
 
         assertFalse(doc.children.any { it is LatexNode.Command })
         assertEquals(
-            listOf("{", "}", "$", "%", "#", "&", "_", "‖"),
+            listOf("{", "}", "$", "%", "#", "&", "_"),
             doc.children.filterIsInstance<LatexNode.Symbol>().map { it.unicode }
         )
+    }
+
+    @Test
+    fun testDoubleVerticalBarControlSymbol() {
+        val symbol = parser.parse("\\|").children.single() as LatexNode.Symbol
+        assertEquals("‖", symbol.unicode)
     }
     
     @Test

@@ -734,7 +734,8 @@ val basicLatexPreviewGroups = listOf(
             PreviewItem("6", "负自定义空格", "a \\hspace{-0.5em} b"),
             PreviewItem("7", "命名空格", "a \\space b \\thinspace c \\medspace d \\thickspace e"),
             PreviewItem("8", "扩展空格", "a \\enspace b \\enskip c \\negmedspace d \\negthickspace e"),
-            PreviewItem("9", "转义特殊字符", "\\{ \\} \\$ \\% \\# \\& \\_ \\|"),
+            PreviewItem("9", "转义特殊字符", "\\{ \\} \\$ \\% \\# \\& \\_"),
+            PreviewItem("10", "双竖线命令", "\\| \\quad \\left\\| x \\right\\| \\quad \\big\\|"),
         )
     ),
     PreviewGroup(

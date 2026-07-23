@@ -88,6 +88,18 @@ class DelimiterTest {
         assertEquals("|", delim.left)
         assertEquals("|", delim.right)
     }
+
+    @Test
+    fun testDoubleVerticalBarControlSymbol() {
+        val autoSized = parser.parse("\\left\\| x \\right\\|")
+        val autoSizedDelimiter = autoSized.children[0] as LatexNode.Delimited
+        assertEquals("‖", autoSizedDelimiter.left)
+        assertEquals("‖", autoSizedDelimiter.right)
+
+        val manualSized = parser.parse("\\big\\|")
+        val manualSizedDelimiter = manualSized.children[0] as LatexNode.ManualSizedDelimiter
+        assertEquals("‖", manualSizedDelimiter.delimiter)
+    }
     
     @Test
     fun testAngleBrackets() {
