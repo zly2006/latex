@@ -24,8 +24,10 @@
 package com.hrm.latex.parser
 
 import com.hrm.latex.parser.model.LatexNode
+import com.hrm.latex.parser.visitor.MathMLVisitor
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -174,6 +176,46 @@ class SpecialEffectTest {
         assertEquals(listOf(LatexNode.Enclose.Notation.ROUNDEDBOX), enclose.notations)
         assertEquals("red", enclose.attributes["mathcolor"])
         assertEquals("yellow", enclose.attributes["mathbackground"])
+    }
+
+    @Test
+    fun should_parse_mathjax_bbox_options() {
+        val doc = parser.parse("\\bbox[5px, border: 1px solid purple]{x+y}")
+        val enclose = doc.children.first()
+        assertIs<LatexNode.Enclose>(enclose)
+        assertEquals(listOf(LatexNode.Enclose.Notation.BOX), enclose.notations)
+        assertEquals("5px", enclose.attributes["padding"])
+        assertEquals("1px solid purple", enclose.attributes["border"])
+        assertEquals("purple", enclose.attributes["mathcolor"])
+    }
+
+    @Test
+    fun should_parse_mathjax_bbox_background() {
+        val doc = parser.parse("\\bbox[#CAF,20px,border:1px]{\\delta S=0}")
+        val enclose = doc.children.first()
+        assertIs<LatexNode.Enclose>(enclose)
+        assertEquals("#CAF", enclose.attributes["mathbackground"])
+        assertEquals("20px", enclose.attributes["padding"])
+        assertEquals("1px solid currentColor", enclose.attributes["border"])
+    }
+
+    @Test
+    fun should_emit_bbox_without_longdiv_mathml() {
+        val mathMl = MathMLVisitor.convert(parser.parse("\\bbox[#CAF,5px]{x}"))
+
+        assertFalse(mathMl.contains("longdiv"))
+        assertTrue(mathMl.contains("<mpadded"))
+        assertTrue(mathMl.contains("background-color: #CAF"))
+        assertTrue(mathMl.contains("""width="+10px""""))
+    }
+
+    @Test
+    fun should_normalize_width_only_bbox_border_for_mathml() {
+        val mathMl = MathMLVisitor.convert(
+            parser.parse("\\bbox[#CAF,20px,border:1px]{\\delta S=0}")
+        )
+
+        assertTrue(mathMl.contains("border: 1px solid currentColor"))
     }
 
     @Test

@@ -23,8 +23,10 @@
 
 package com.hrm.latex.parser
 
+import com.hrm.latex.parser.model.LatexNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -37,6 +39,25 @@ import kotlin.test.assertTrue
  * - 空内容处理
  */
 class EdgeCasesTest {
+    @Test
+    fun should_stop_control_word_before_cjk_text() {
+        val document = LatexParser().parse("\\quad特征函数 + \\tau函数")
+
+        assertFalse(document.children.any { it is LatexNode.Command })
+        assertTrue(document.children.any { it is LatexNode.Space && it.type == LatexNode.Space.SpaceType.QUAD })
+        assertTrue(document.children.any { it is LatexNode.Symbol && it.symbol == "tau" })
+    }
+
+    @Test
+    fun should_preserve_and_report_trailing_backslash() {
+        val result = LatexParser().parseWithDiagnostics("x\\")
+        val document = result.document
+
+        assertFalse(document.children.any { it is LatexNode.Command })
+        assertTrue(document.children.any { it is LatexNode.Text && it.content == "\\" })
+        assertTrue(result.errors.any { it.category == ParseDiagnostic.Category.UNKNOWN_COMMAND })
+    }
+
     
     private val parser = LatexParser()
     

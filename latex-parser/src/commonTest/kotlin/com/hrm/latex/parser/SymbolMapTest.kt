@@ -309,6 +309,8 @@ class SymbolMapTest {
         assertEquals("⌋", SymbolMap.getSymbol("rfloor"))
         assertEquals("⌈", SymbolMap.getSymbol("lceil"))
         assertEquals("⌉", SymbolMap.getSymbol("rceil"))
+        assertEquals("[", SymbolMap.getSymbol("lbrack"))
+        assertEquals("]", SymbolMap.getSymbol("rbrack"))
     }
 
     // ========== 大型运算符测试 ==========
@@ -324,6 +326,7 @@ class SymbolMapTest {
         assertEquals("⋀", SymbolMap.getSymbol("bigwedge"))
         assertEquals("⨁", SymbolMap.getSymbol("bigoplus"))
         assertEquals("⨂", SymbolMap.getSymbol("bigotimes"))
+        assertEquals("★", SymbolMap.getSymbol("bigstar"))
     }
 
     // ========== 边界情况测试 ==========

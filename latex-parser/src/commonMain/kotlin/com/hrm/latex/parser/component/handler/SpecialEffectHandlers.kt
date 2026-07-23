@@ -25,6 +25,16 @@ package com.hrm.latex.parser.component.handler
 import com.hrm.latex.parser.model.LatexNode
 import com.hrm.latex.parser.tokenizer.LatexToken
 
+private val bboxDimensionPattern =
+    Regex("""(-?\d+(?:\.\d+)?)(px|pt|em|ex|mm|cm|in)""", RegexOption.IGNORE_CASE)
+private val bboxColorPattern = Regex("""[A-Za-z]+|#[0-9A-Fa-f]{3,8}""")
+private val bboxBorderPattern =
+    Regex(
+        """(-?\d+(?:\.\d+)?(?:px|pt|em|ex|mm|cm|in))\s+""" +
+            """(solid|dashed|dotted)\s+([A-Za-z]+|#[0-9A-Fa-f]{3,8})""",
+        RegexOption.IGNORE_CASE
+    )
+
 /**
  * 特殊效果命令：\boxed, \enclose, \phantom, \smash, \vphantom, \hphantom, \not
  */
@@ -42,6 +52,17 @@ internal fun CommandRegistry.installSpecialEffectHandlers() {
 
         val attributes = parseAttributeList(parseOptionalBracketText(stream))
 
+        val arg = ctx.parseArgument() ?: LatexNode.Text("")
+        LatexNode.Enclose(
+            content = unwrapContent(arg),
+            notations = notations,
+            attributes = attributes
+        )
+    }
+
+    // MathJax \bbox[padding,border]{content}, used by Zhihu's equation service.
+    register("bbox") { _, ctx, stream ->
+        val (notations, attributes) = parseBBoxOptions(parseOptionalBracketText(stream))
         val arg = ctx.parseArgument() ?: LatexNode.Text("")
         LatexNode.Enclose(
             content = unwrapContent(arg),
@@ -175,4 +196,40 @@ private fun parseAttributeList(raw: String?): Map<String, String> {
     return regex.findAll(raw).associate { match ->
         match.groupValues[1] to match.groupValues[2]
     }
+}
+
+private fun parseBBoxOptions(raw: String?): Pair<List<LatexNode.Enclose.Notation>, Map<String, String>> {
+    if (raw.isNullOrBlank()) {
+        return emptyList<LatexNode.Enclose.Notation>() to
+            mapOf(LatexNode.Enclose.BBOX_ATTRIBUTE to "true")
+    }
+
+    val attributes = mutableMapOf(LatexNode.Enclose.BBOX_ATTRIBUTE to "true")
+    var hasBorder = false
+    raw.split(',').map(String::trim).filter(String::isNotEmpty).forEach { option ->
+        when {
+            option.startsWith("border:", ignoreCase = true) -> {
+                val border = option.substringAfter(':').trim()
+                val borderMatch = bboxBorderPattern.matchEntire(border)
+                when {
+                    borderMatch != null -> {
+                        attributes["border"] = borderMatch.value
+                        attributes["mathcolor"] = borderMatch.groupValues[3]
+                        hasBorder = true
+                    }
+
+                    bboxDimensionPattern.matches(border) -> {
+                        attributes["border"] = "$border solid currentColor"
+                        hasBorder = true
+                    }
+                }
+            }
+
+            bboxDimensionPattern.matches(option) -> attributes["padding"] = option
+
+            bboxColorPattern.matches(option) -> attributes["mathbackground"] = option
+        }
+    }
+    val notations = if (hasBorder) listOf(LatexNode.Enclose.Notation.BOX) else emptyList()
+    return notations to attributes
 }

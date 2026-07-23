@@ -302,6 +302,8 @@ object SymbolMap {
         "rVert" to "‖",
         "lbrace" to "{",
         "rbrace" to "}",
+        "lbrack" to "[",
+        "rbrack" to "]",
 
         // 额外定界符
         "lgroup" to "⟮",
@@ -491,6 +493,7 @@ object SymbolMap {
         "daleth" to "ℸ",
         "hslash" to "ℏ",
         "blacklozenge" to "⧫",
+        "bigstar" to "★",
         "Bbbk" to "𝕜"
     )
 

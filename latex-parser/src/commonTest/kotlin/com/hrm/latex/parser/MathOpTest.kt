@@ -83,6 +83,16 @@ class MathOpTest {
     }
 
     @Test
+    fun should_parse_mathop_text_with_limits() {
+        val result = parser.parse("\\mathop{\\text{limsup}}\\limits_{n\\to\\infty}")
+        val node = result.children.single()
+        assertIs<LatexNode.BigOperator>(node)
+        assertEquals("limsup", node.operator)
+        assertEquals(LatexNode.BigOperator.LimitsMode.LIMITS, node.limitsMode)
+        assertNotNull(node.subscript)
+    }
+
+    @Test
     fun should_parse_mathop_with_nolimits() {
         val result = parser.parse("\\mathop{op}\\nolimits_{a}")
         val children = result.children

@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextMeasurer
@@ -37,6 +38,7 @@ import com.hrm.latex.renderer.layout.NodeLayout
 import com.hrm.latex.renderer.model.RenderContext
 import com.hrm.latex.renderer.model.textStyle
 import com.hrm.latex.renderer.utils.MathConstants
+import com.hrm.latex.renderer.utils.parseDimension
 import kotlin.reflect.KClass
 
 /**
@@ -107,7 +109,12 @@ internal class BoxedPhantomMeasurer : NodeMeasurer {
         measureGroup: (List<LatexNode>, RenderContext) -> NodeLayout
     ): NodeLayout {
         val contentLayout = measureGroup(node.content, context)
-        val strokeWidth = with(density) { MathConstants.BOXED_BORDER_WIDTH_DP.dp.toPx() }
+        val defaultStrokeWidth = with(density) { MathConstants.BOXED_BORDER_WIDTH_DP.dp.toPx() }
+        val strokeWidth = node.attributes["border"]
+            ?.substringBefore(' ')
+            ?.let { parseDimension(it, context, density) }
+            ?.takeIf { it > 0f }
+            ?: defaultStrokeWidth
         val hasOutline = node.notations.any {
             it in setOf(
                 LatexNode.Enclose.Notation.BOX,
@@ -120,11 +127,14 @@ internal class BoxedPhantomMeasurer : NodeMeasurer {
             )
         }
         val hasBackground = node.attributes["mathbackground"] != null
-        val padding = if (hasOutline || hasBackground) {
-            with(density) { (context.fontSize * MathConstants.BOXED_PADDING).toPx() }
-        } else {
-            strokeWidth
-        }
+        val padding = node.attributes["padding"]
+            ?.let { parseDimension(it, context, density) }
+            ?.takeIf { it >= 0f }
+            ?: if (hasOutline || hasBackground) {
+                with(density) { (context.fontSize * MathConstants.BOXED_PADDING).toPx() }
+            } else {
+                strokeWidth
+            }
 
         val totalWidth = contentLayout.width + 2 * padding
         val totalHeight = contentLayout.height + 2 * padding
@@ -147,7 +157,12 @@ internal class BoxedPhantomMeasurer : NodeMeasurer {
             val size = Size(totalWidth, totalHeight)
             val centerX = x + totalWidth / 2f
             val centerY = y + totalHeight / 2f
-            val lineStyle = Stroke(width = strokeWidth)
+            val pathEffect = when (node.attributes["border"]?.split(Regex("\\s+"))?.getOrNull(1)?.lowercase()) {
+                "dashed" -> PathEffect.dashPathEffect(floatArrayOf(strokeWidth * 4, strokeWidth * 2))
+                "dotted" -> PathEffect.dashPathEffect(floatArrayOf(strokeWidth, strokeWidth))
+                else -> null
+            }
+            val lineStyle = Stroke(width = strokeWidth, pathEffect = pathEffect)
             val inset = strokeWidth / 2f
 
             for (notation in node.notations) {
