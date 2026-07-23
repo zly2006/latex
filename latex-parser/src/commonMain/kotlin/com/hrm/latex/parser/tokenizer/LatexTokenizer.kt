@@ -184,9 +184,9 @@ class LatexTokenizer(private val input: String, startOffset: Int = 0) {
         val cmdStart = position
         if (position < input.length) {
             val firstChar = input[position]
-            if (firstChar.isLetter() || firstChar == '@') {
+            if (firstChar.isAsciiLetter() || firstChar == '@') {
                 position++
-                while (position < input.length && input[position].isLetter()) {
+                while (position < input.length && input[position].isAsciiLetter()) {
                     position++
                 }
             }
@@ -238,6 +238,8 @@ class LatexTokenizer(private val input: String, startOffset: Int = 0) {
             }
         }
     }
+
+    private fun Char.isAsciiLetter(): Boolean = this in 'a'..'z' || this in 'A'..'Z'
 
     private fun readEnvironmentName(): String? {
         skipWhitespace()

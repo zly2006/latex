@@ -302,6 +302,18 @@ object SymbolMap {
         "rVert" to "‖",
         "lbrace" to "{",
         "rbrace" to "}",
+        "lbrack" to "[",
+        "rbrack" to "]",
+
+        // TeX special characters written as control symbols
+        "{" to "{",
+        "}" to "}",
+        "$" to "$",
+        "%" to "%",
+        "#" to "#",
+        "&" to "&",
+        "_" to "_",
+        "|" to "‖",
 
         // TeX special characters written as control symbols
         "{" to "{",
@@ -501,6 +513,7 @@ object SymbolMap {
         "daleth" to "ℸ",
         "hslash" to "ℏ",
         "blacklozenge" to "⧫",
+        "bigstar" to "★",
         "Bbbk" to "𝕜"
     )
 

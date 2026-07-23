@@ -109,16 +109,10 @@ internal class ParseSession(
     private val commandParser = CommandParser(this, chemicalParser)
 
     fun parse(): LatexNode.Document {
-        val children = mutableListOf<LatexNode>()
-        while (!tokenStream.isEOF()) {
-            val node = parseExpression()
-            if (node != null) {
-                children.add(node)
-            }
-        }
+        val children = parseMathList { false }
 
         val document = LatexNode.Document(
-            normalizeStyleDeclarations(children),
+            children,
             sourceRange = SourceRange(0, inputLength)
         )
         HLog.d(TAG) { "解析成功，生成 ${children.size} 个节点, 诊断: ${diagnostics.size} 条" }
@@ -235,19 +229,54 @@ internal class ParseSession(
     override fun parseGroup(): LatexNode.Group {
         val startOffset = tokenStream.currentSourceOffset()
         tokenStream.expect("{")
-        val children = mutableListOf<LatexNode>()
+        val children = parseMathList { it is LatexToken.RightBrace }
 
-        while (!tokenStream.isEOF() && tokenStream.peek() !is LatexToken.RightBrace) {
+        if (!tokenStream.isEOF()) {
+            tokenStream.expect("}")
+        }
+        return LatexNode.Group(children, sourceRange = tokenStream.rangeFrom(startOffset))
+    }
+
+    private fun parseMathList(isTerminator: (LatexToken?) -> Boolean): List<LatexNode> {
+        val listStart = tokenStream.currentSourceOffset()
+        val children = mutableListOf<LatexNode>()
+        var atopNumerator: List<LatexNode>? = null
+        var atopRange: SourceRange? = null
+
+        while (!tokenStream.isEOF() && !isTerminator(tokenStream.peek())) {
+            val token = tokenStream.peek()
+            if (token is LatexToken.Command && token.name == "atop" && atopNumerator == null) {
+                tokenStream.advance()
+                atopNumerator = normalizeStyleDeclarations(children.toList())
+                atopRange = token.range
+                children.clear()
+                continue
+            }
             val node = parseExpression()
             if (node != null) {
                 children.add(node)
             }
         }
 
-        if (!tokenStream.isEOF()) {
-            tokenStream.expect("}")
-        }
-        return LatexNode.Group(normalizeStyleDeclarations(children), sourceRange = tokenStream.rangeFrom(startOffset))
+        val normalizedChildren = normalizeStyleDeclarations(children)
+        return atopNumerator?.let { numerator ->
+            val separatorRange = requireNotNull(atopRange)
+            val listEnd = tokenStream.previousEndOffset()
+            listOf(
+                LatexNode.Fraction(
+                    numerator = LatexNode.Group(
+                        numerator,
+                        sourceRange = SourceRange(listStart, separatorRange.start)
+                    ),
+                    denominator = LatexNode.Group(
+                        normalizedChildren,
+                        sourceRange = SourceRange(separatorRange.end, listEnd)
+                    ),
+                    style = LatexNode.Fraction.FractionStyle.RULELESS,
+                    sourceRange = SourceRange(listStart, listEnd)
+                )
+            )
+        } ?: normalizedChildren
     }
 
     override fun parseArgument(): LatexNode? {
@@ -265,25 +294,19 @@ internal class ParseSession(
         val count = openToken.count
         tokenStream.advance()
 
-        val children = mutableListOf<LatexNode>()
-        while (!tokenStream.isEOF()) {
-            val next = tokenStream.peek()
-            if (next is LatexToken.MathShift && next.count == count) {
-                tokenStream.advance()
-                break
-            }
-            val node = parseExpression()
-            if (node != null) {
-                children.add(node)
-            }
+        val children = parseMathList { token ->
+            token is LatexToken.MathShift && token.count == count
+        }
+        val closingToken = tokenStream.peek()
+        if (closingToken is LatexToken.MathShift && closingToken.count == count) {
+            tokenStream.advance()
         }
 
         val range = tokenStream.rangeFrom(startOffset)
-        val normalizedChildren = normalizeStyleDeclarations(children)
         return if (count == 2) {
-            LatexNode.DisplayMath(normalizedChildren, sourceRange = range)
+            LatexNode.DisplayMath(children, sourceRange = range)
         } else {
-            LatexNode.InlineMath(normalizedChildren, sourceRange = range)
+            LatexNode.InlineMath(children, sourceRange = range)
         }
     }
 

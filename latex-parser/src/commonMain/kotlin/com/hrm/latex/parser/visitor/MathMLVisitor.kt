@@ -25,6 +25,9 @@ package com.hrm.latex.parser.visitor
 import com.hrm.latex.parser.model.LatexNode
 import kotlin.math.round
 
+private val bboxMathMlDimensionPattern =
+    Regex("""(-?\d+(?:\.\d+)?)(px|pt|em|ex|mm|cm|in)""", RegexOption.IGNORE_CASE)
+
 /**
  * LaTeX AST → MathML 转换访问者
  *
@@ -110,7 +113,12 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
     }
 
     override fun visitFraction(node: LatexNode.Fraction): String {
-        val frac = "<mfrac>${visit(node.numerator)}${visit(node.denominator)}</mfrac>"
+        val lineThickness = if (node.style == LatexNode.Fraction.FractionStyle.RULELESS) {
+            " linethickness=\"0\""
+        } else {
+            ""
+        }
+        val frac = "<mfrac$lineThickness>${visit(node.numerator)}${visit(node.denominator)}</mfrac>"
         return when (node.style) {
             LatexNode.Fraction.FractionStyle.DISPLAY,
             LatexNode.Fraction.FractionStyle.CONTINUED ->
@@ -119,6 +127,7 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
             LatexNode.Fraction.FractionStyle.TEXT ->
                 "<mstyle displaystyle=\"false\">$frac</mstyle>"
 
+            LatexNode.Fraction.FractionStyle.RULELESS,
             LatexNode.Fraction.FractionStyle.NORMAL ->
                 frac
         }
@@ -488,6 +497,9 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
 
     override fun visitEnclose(node: LatexNode.Enclose): String {
         val content = node.content.joinToString("") { visit(it) }
+        if (node.attributes[LatexNode.Enclose.BBOX_ATTRIBUTE] == "true") {
+            return renderBBox(content, node.attributes)
+        }
         return renderMenclose(content, node.notations, node.attributes)
     }
 
@@ -582,6 +594,24 @@ class MathMLVisitor : BaseLatexVisitor<String>() {
             " ${escapeXml(key)}=\"${escapeXml(value)}\""
         }
         return "<menclose notation=\"$notationAttr\"$extraAttrs>$content</menclose>"
+    }
+
+    private fun renderBBox(content: String, attributes: Map<String, String>): String {
+        val padding = attributes["padding"]
+        val paddingAttributes = padding?.let {
+            val doubled = bboxMathMlDimensionPattern.matchEntire(it)?.let { match ->
+                val value = match.groupValues[1].toDouble() * 2
+                "${value.toString().removeSuffix(".0")}${match.groupValues[2]}"
+            } ?: it
+            """ lspace="${escapeXml(it)}" width="+${escapeXml(doubled)}"""" +
+                """ height="+${escapeXml(it)}" depth="+${escapeXml(it)}""""
+        } ?: ""
+        val styles = buildList {
+            attributes["mathbackground"]?.let { add("background-color: $it") }
+            attributes["border"]?.let { add("border: $it") }
+        }.joinToString("; ")
+        val styleAttribute = if (styles.isEmpty()) "" else """ style="${escapeXml(styles)}""""
+        return "<mpadded$paddingAttributes$styleAttribute>$content</mpadded>"
     }
 
     private fun buildTable(rows: List<List<LatexNode>>): String {
