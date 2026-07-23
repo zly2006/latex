@@ -170,6 +170,7 @@ private fun parseOptionalBracketText(stream: com.hrm.latex.parser.component.Late
             is LatexToken.LeftBracket -> builder.append("[")
             is LatexToken.RightBracket -> builder.append("]")
             is LatexToken.Superscript -> builder.append("^")
+            is LatexToken.Prime -> builder.append("'")
             is LatexToken.Subscript -> builder.append("_")
             is LatexToken.Ampersand -> builder.append("&")
             is LatexToken.NewLine -> builder.append("\\\\")

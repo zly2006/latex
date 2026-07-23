@@ -63,6 +63,9 @@ sealed class LatexToken {
     data class Superscript(override val range: SourceRange = SourceRange.EMPTY) : LatexToken() {
         override fun withRange(newRange: SourceRange) = copy(range = newRange)
     }
+    data class Prime(override val range: SourceRange = SourceRange.EMPTY) : LatexToken() {
+        override fun withRange(newRange: SourceRange) = copy(range = newRange)
+    }
     data class Subscript(override val range: SourceRange = SourceRange.EMPTY) : LatexToken() {
         override fun withRange(newRange: SourceRange) = copy(range = newRange)
     }
