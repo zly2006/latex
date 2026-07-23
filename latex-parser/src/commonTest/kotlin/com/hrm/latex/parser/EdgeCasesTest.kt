@@ -23,8 +23,10 @@
 
 package com.hrm.latex.parser
 
+import com.hrm.latex.parser.model.LatexNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -110,8 +112,13 @@ class EdgeCasesTest {
     
     @Test
     fun testSpecialCharactersEscaped() {
-        val doc = parser.parse("\\{ \\} \\$ \\%")
-        assertTrue(doc.children.isNotEmpty())
+        val doc = parser.parse("\\{ \\} \\$ \\% \\# \\& \\_ \\|")
+
+        assertFalse(doc.children.any { it is LatexNode.Command })
+        assertEquals(
+            listOf("{", "}", "$", "%", "#", "&", "_", "‖"),
+            doc.children.filterIsInstance<LatexNode.Symbol>().map { it.unicode }
+        )
     }
     
     @Test
