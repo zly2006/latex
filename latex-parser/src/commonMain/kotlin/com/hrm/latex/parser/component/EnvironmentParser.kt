@@ -32,7 +32,14 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
 
     companion object {
         private const val TAG = "EnvironmentParser"
+        private val ROW_GAP_PATTERN =
+            Regex("""([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(em|ex|mu|pt|mm|cm|in|bp|pc|dd|cc|sp)""")
     }
+
+    private data class RowColumnStructure(
+        val rows: List<List<LatexNode>>,
+        val rowGaps: List<LatexNode.RowGap?>
+    )
 
     /**
      * 解析环境
@@ -114,8 +121,9 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
     private fun parseRowColumnStructure(
         envName: String,
         handleSpecialNodes: Boolean = false
-    ): List<List<LatexNode>> {
+    ): RowColumnStructure {
         val rows = mutableListOf<List<LatexNode>>()
+        val rowGaps = mutableListOf<LatexNode.RowGap?>()
         var currentRow = mutableListOf<LatexNode>()
         var currentCell = mutableListOf<LatexNode>()
 
@@ -123,7 +131,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
             when (val token = tokenStream.peek()) {
                 is LatexToken.EndEnvironment -> {
                     if (token.name == envName) {
-                        if (currentCell.isNotEmpty()) {
+                        if (currentCell.hasVisibleContent()) {
                             currentRow.add(LatexNode.Group(context.normalizeStyleDeclarations(currentCell)))
                         }
                         if (currentRow.isNotEmpty()) {
@@ -147,12 +155,11 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                     if (currentCell.isNotEmpty()) {
                         currentRow.add(LatexNode.Group(context.normalizeStyleDeclarations(currentCell)))
                     }
-                    if (currentRow.isNotEmpty()) {
-                        rows.add(currentRow)
-                    }
+                    rows.add(currentRow)
                     currentRow = mutableListOf()
                     currentCell = mutableListOf()
                     tokenStream.advance()
+                    rowGaps.add(consumeOptionalRowSpacing())
                 }
 
                 else -> {
@@ -160,7 +167,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                     if (node != null) {
                         if (handleSpecialNodes && (node is LatexNode.HLine || node is LatexNode.CLine)) {
                             // 先保存当前累积的内容
-                            if (currentCell.isNotEmpty()) {
+                            if (currentCell.hasVisibleContent()) {
                                 currentRow.add(LatexNode.Group(context.normalizeStyleDeclarations(currentCell)))
                                 currentCell = mutableListOf()
                             }
@@ -177,7 +184,46 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
             }
         }
 
-        return rows
+        return RowColumnStructure(rows, rowGaps)
+    }
+
+    private fun List<LatexNode>.hasVisibleContent(): Boolean = any { it !is LatexNode.Space }
+
+    private fun consumeOptionalRowSpacing(): LatexNode.RowGap? {
+        if (tokenStream.peek() !is LatexToken.LeftBracket) {
+            return null
+        }
+
+        var offset = 1
+        while (true) {
+            when (tokenStream.peek(offset)) {
+                is LatexToken.RightBracket -> break
+                is LatexToken.EOF,
+                is LatexToken.EndEnvironment,
+                is LatexToken.NewLine,
+                null,
+                -> return null
+                else -> offset++
+            }
+        }
+
+        tokenStream.advance()
+        val value = buildString {
+            repeat(offset - 1) {
+                when (val token = tokenStream.advance()) {
+                    is LatexToken.Text -> append(token.content)
+                    is LatexToken.Whitespace -> append(token.content)
+                    else -> Unit
+                }
+            }
+        }
+        tokenStream.advance()
+
+        val match = ROW_GAP_PATTERN.matchEntire(value.trim()) ?: return null
+        return LatexNode.RowGap(
+            number = match.groupValues[1].toDouble(),
+            unit = match.groupValues[2]
+        )
     }
 
     // ====================================================================
@@ -198,8 +244,13 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
         }
 
         val actualEnvName = if (isSmall) "smallmatrix" else envName
-        val rows = parseRowColumnStructure(actualEnvName)
-        return LatexNode.Matrix(rows, matrixType, isSmall)
+        val structure = parseRowColumnStructure(actualEnvName)
+        return LatexNode.Matrix(
+            structure.rows,
+            matrixType,
+            isSmall,
+            rowGaps = structure.rowGaps
+        )
     }
 
     /**
@@ -207,8 +258,8 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
      */
     private fun parseArray(): LatexNode.Array {
         val alignment = parseAlignmentSpec()
-        val rows = parseRowColumnStructure("array", handleSpecialNodes = true)
-        return LatexNode.Array(rows, alignment)
+        val structure = parseRowColumnStructure("array", handleSpecialNodes = true)
+        return LatexNode.Array(structure.rows, alignment, rowGaps = structure.rowGaps)
     }
 
     /**
@@ -216,16 +267,20 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
      */
     private fun parseTabular(): LatexNode.Tabular {
         val alignment = parseAlignmentSpec()
-        val rows = parseRowColumnStructure("tabular", handleSpecialNodes = true)
-        return LatexNode.Tabular(rows, alignment)
+        val structure = parseRowColumnStructure("tabular", handleSpecialNodes = true)
+        return LatexNode.Tabular(structure.rows, alignment, rowGaps = structure.rowGaps)
     }
 
     /**
      * 解析对齐环境
      */
     private fun parseAligned(envName: String): LatexNode.Aligned {
-        val rows = parseRowColumnStructure(envName)
-        return LatexNode.Aligned(rows, envName = envName)
+        val structure = parseRowColumnStructure(envName)
+        return LatexNode.Aligned(
+            structure.rows,
+            envName = envName,
+            rowGaps = structure.rowGaps
+        )
     }
 
     /**
@@ -243,8 +298,8 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
      * 解析 split 环境
      */
     private fun parseSplit(): LatexNode.Split {
-        val rows = parseRowColumnStructure("split")
-        return LatexNode.Split(rows)
+        val structure = parseRowColumnStructure("split")
+        return LatexNode.Split(structure.rows, rowGaps = structure.rowGaps)
     }
 
     /**
@@ -253,6 +308,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
     private fun parseMultline(envName: String): LatexNode.Multline {
         // multline 没有列分隔符，只有行分隔
         val lines = mutableListOf<LatexNode>()
+        val rowGaps = mutableListOf<LatexNode.RowGap?>()
         var currentLine = mutableListOf<LatexNode>()
 
         while (!tokenStream.isEOF()) {
@@ -275,6 +331,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                     }
                     currentLine = mutableListOf()
                     tokenStream.advance()
+                    rowGaps.add(consumeOptionalRowSpacing())
                 }
 
                 else -> {
@@ -286,15 +343,19 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
             }
         }
 
-        return LatexNode.Multline(lines, envName = envName)
+        return LatexNode.Multline(lines, envName = envName, rowGaps = rowGaps)
     }
 
     /**
      * 解析 eqnarray 环境
      */
     private fun parseEqnarray(envName: String): LatexNode.Eqnarray {
-        val rows = parseRowColumnStructure(envName)
-        return LatexNode.Eqnarray(rows, envName = envName)
+        val structure = parseRowColumnStructure(envName)
+        return LatexNode.Eqnarray(
+            structure.rows,
+            envName = envName,
+            rowGaps = structure.rowGaps
+        )
     }
 
     /**
@@ -310,6 +371,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
      */
     private fun parseCases(envName: String, style: LatexNode.Cases.CasesStyle): LatexNode.Cases {
         val cases = mutableListOf<Pair<LatexNode, LatexNode>>()
+        val rowGaps = mutableListOf<LatexNode.RowGap?>()
         var expression = mutableListOf<LatexNode>()
         var condition = mutableListOf<LatexNode>()
         var isCondition = false
@@ -318,7 +380,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
             when (val token = tokenStream.peek()) {
                 is LatexToken.EndEnvironment -> {
                     if (token.name == envName) {
-                        if (expression.isNotEmpty()) {
+                        if (expression.hasVisibleContent() || condition.hasVisibleContent()) {
                             cases.add(
                                 LatexNode.Group(context.normalizeStyleDeclarations(expression)) to
                                     LatexNode.Group(context.normalizeStyleDeclarations(condition))
@@ -347,6 +409,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
                     condition = mutableListOf()
                     isCondition = false
                     tokenStream.advance()
+                    rowGaps.add(consumeOptionalRowSpacing())
                 }
 
                 else -> {
@@ -362,7 +425,7 @@ internal class EnvironmentParser(private val context: LatexParserContext) {
             }
         }
 
-        return LatexNode.Cases(cases, style)
+        return LatexNode.Cases(cases, style, rowGaps = rowGaps)
     }
 
     // ====================================================================

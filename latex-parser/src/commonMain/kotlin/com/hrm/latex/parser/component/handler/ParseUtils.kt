@@ -43,10 +43,23 @@ internal object ParseUtils {
                 is LatexNode.Text -> node.content
                 is LatexNode.Group -> extractText(node.children)
                 is LatexNode.Space -> " "
+                is LatexNode.Symbol -> if (node.symbol == "prime") "'" else node.unicode
+                is LatexNode.Superscript -> {
+                    val primes = node.exponent.primeCount()
+                    if (primes == null) "" else extractText(listOf(node.base)) + "'".repeat(primes)
+                }
                 else -> ""
             }
         }
     }
+
+    private fun LatexNode.primeCount(): Int? =
+        (this as? LatexNode.Group)
+            ?.children
+            ?.takeIf { children ->
+                children.isNotEmpty() &&
+                    children.all { child -> child is LatexNode.Symbol && child.symbol == "prime" }
+            }?.size
 
     /**
      * 从节点中提取颜色名称字符串

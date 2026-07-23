@@ -125,13 +125,37 @@ internal class ParseSession(
 
         while (true) {
             val token = tokenStream.peek()
-            if (token is LatexToken.Superscript) {
+            if (token is LatexToken.Prime) {
+                val primes = mutableListOf<LatexNode>()
+                while (tokenStream.peek() is LatexToken.Prime) {
+                    val prime = tokenStream.advance() as LatexToken.Prime
+                    primes.add(LatexNode.Symbol("prime", "′", sourceRange = prime.range))
+                }
+                if (node.hasSuperscript()) {
+                    reportDoubleSuperscript(token.range)
+                } else {
+                    node = LatexNode.Superscript(
+                        node,
+                        LatexNode.Group(primes),
+                        sourceRange = tokenStream.rangeFrom(startOffset)
+                    )
+                }
+            } else if (token is LatexToken.Superscript) {
                 tokenStream.advance()
                 val exponent = parseScriptContent()
-                node = LatexNode.Superscript(
-                    node, exponent,
-                    sourceRange = tokenStream.rangeFrom(startOffset)
-                )
+                node =
+                    if (node.hasPrimeOnlySuperscript()) {
+                        node.appendToPrimeSuperscript(exponent, tokenStream.rangeFrom(startOffset))
+                    } else if (node.hasSuperscript()) {
+                        reportDoubleSuperscript(token.range)
+                        node
+                    } else {
+                        LatexNode.Superscript(
+                            node,
+                            exponent,
+                            sourceRange = tokenStream.rangeFrom(startOffset)
+                        )
+                    }
             } else if (token is LatexToken.Subscript) {
                 tokenStream.advance()
                 val index = parseScriptContent()
@@ -144,6 +168,41 @@ internal class ParseSession(
             }
         }
         return node
+    }
+
+    private fun LatexNode.hasSuperscript(): Boolean =
+        when (this) {
+            is LatexNode.Superscript -> true
+            is LatexNode.Subscript -> base.hasSuperscript()
+            else -> false
+        }
+
+    private fun LatexNode.hasPrimeOnlySuperscript(): Boolean =
+        this is LatexNode.Superscript && exponent.isPrimeOnly()
+
+    private fun LatexNode.isPrimeOnly(): Boolean =
+        this is LatexNode.Group &&
+            children.isNotEmpty() &&
+            children.all { child -> child is LatexNode.Symbol && child.symbol == "prime" }
+
+    private fun LatexNode.appendToPrimeSuperscript(
+        exponent: LatexNode,
+        range: SourceRange
+    ): LatexNode =
+        (this as LatexNode.Superscript).copy(
+            exponent = LatexNode.Group((this.exponent as LatexNode.Group).children + exponent),
+            sourceRange = range
+        )
+
+    private fun reportDoubleSuperscript(range: SourceRange) {
+        diagnostics.add(
+            ParseDiagnostic(
+                range = range,
+                message = "Double superscript",
+                severity = ParseDiagnostic.Severity.ERROR,
+                category = ParseDiagnostic.Category.INVALID_ARGUMENT
+            )
+        )
     }
 
     override fun parseFactor(): LatexNode? {
@@ -200,6 +259,19 @@ internal class ParseSession(
             is LatexToken.Ampersand -> {
                 tokenStream.advance()
                 return LatexNode.Text("&", sourceRange = token.range)
+            }
+
+            is LatexToken.Prime -> {
+                tokenStream.advance()
+                diagnostics.add(
+                    ParseDiagnostic(
+                        range = token.range,
+                        message = "Prime requires a base",
+                        severity = ParseDiagnostic.Severity.WARNING,
+                        category = ParseDiagnostic.Category.UNEXPECTED_TOKEN
+                    )
+                )
+                return LatexNode.Symbol("prime", "′", sourceRange = token.range)
             }
 
             is LatexToken.MathShift -> {

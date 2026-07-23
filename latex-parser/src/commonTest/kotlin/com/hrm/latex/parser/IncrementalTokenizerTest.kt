@@ -285,6 +285,7 @@ class IncrementalTokenizerTest {
         is LatexToken.LeftBracket -> "LBracket(${token.range})"
         is LatexToken.RightBracket -> "RBracket(${token.range})"
         is LatexToken.Superscript -> "Super(${token.range})"
+        is LatexToken.Prime -> "Prime(${token.range})"
         is LatexToken.Subscript -> "Sub(${token.range})"
         is LatexToken.Ampersand -> "Amp(${token.range})"
         is LatexToken.NewLine -> "NL(${token.range})"
