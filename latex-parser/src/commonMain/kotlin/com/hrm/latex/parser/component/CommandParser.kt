@@ -24,9 +24,11 @@
 package com.hrm.latex.parser.component
 
 import com.hrm.latex.base.log.HLog
+import com.hrm.latex.parser.ParseDiagnostic
 import com.hrm.latex.parser.SymbolMap
 import com.hrm.latex.parser.component.handler.*
 import com.hrm.latex.parser.model.LatexNode
+import com.hrm.latex.parser.model.SourceRange
 import com.hrm.latex.parser.tokenizer.LatexToken
 
 internal class CommandParser(
@@ -94,6 +96,19 @@ internal class CommandParser(
     }
 
     private fun parseSymbolOrGenericCommand(cmdName: String): LatexNode {
+        if (cmdName.isEmpty()) {
+            val range = tokenStream.peek(-1)?.range ?: SourceRange(0, 0)
+            context.diagnostics.add(
+                ParseDiagnostic(
+                    range = range,
+                    message = "Trailing backslash does not form a control sequence",
+                    severity = ParseDiagnostic.Severity.ERROR,
+                    category = ParseDiagnostic.Category.UNKNOWN_COMMAND
+                )
+            )
+            return LatexNode.Text("\\")
+        }
+
         val unicode = SymbolMap.getSymbol(cmdName)
         if (unicode != null) {
             return LatexNode.Symbol(cmdName, unicode)

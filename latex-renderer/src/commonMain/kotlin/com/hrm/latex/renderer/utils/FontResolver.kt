@@ -443,8 +443,8 @@ internal object FontResolver {
         put("rgroup", main("⟯"))
         put("lmoustache", main("⎰"))
         put("rmoustache", main("⎱"))
-        put("lbrack", main("("))
-        put("rbrack", main(")"))
+        put("lbrack", main("["))
+        put("rbrack", main("]"))
         put("lsqbrack", main("["))
         put("rsqbrack", main("]"))
 
@@ -606,6 +606,7 @@ internal object FontResolver {
         put("daleth", SymbolRenderInfo("ℸ", FontCategory.BLACKBOARD_BOLD))
         put("hslash", main("ℏ"))
         put("blacklozenge", SymbolRenderInfo("⧫", FontCategory.BLACKBOARD_BOLD))
+        put("bigstar", main("★"))
         put("Bbbk", SymbolRenderInfo("𝕜", FontCategory.BLACKBOARD_BOLD))
     }
 

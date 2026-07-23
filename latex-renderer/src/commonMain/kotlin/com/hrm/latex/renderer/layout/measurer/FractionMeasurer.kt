@@ -78,6 +78,7 @@ internal class FractionMeasurer : NodeMeasurer {
             LatexNode.Fraction.FractionStyle.TEXT ->
                 context.copy(mathStyle = MathStyle.TEXT)
 
+            LatexNode.Fraction.FractionStyle.RULELESS,
             LatexNode.Fraction.FractionStyle.NORMAL ->
                 context
         }
@@ -88,8 +89,13 @@ internal class FractionMeasurer : NodeMeasurer {
 
         val fontSizePx = with(density) { effectiveContext.fontSize.toPx() }
         val provider = effectiveContext.mathFontProvider
-        val ruleThickness = provider?.fractionRuleThickness(fontSizePx)
-            ?: (fontSizePx * MathConstants.FRACTION_RULE_THICKNESS)
+        val hasRule = node.style != LatexNode.Fraction.FractionStyle.RULELESS
+        val ruleThickness = if (hasRule) {
+            provider?.fractionRuleThickness(fontSizePx)
+                ?: (fontSizePx * MathConstants.FRACTION_RULE_THICKNESS)
+        } else {
+            0f
+        }
         val gap = provider?.fractionNumeratorGap(fontSizePx)
             ?: (fontSizePx * MathConstants.FRACTION_GAP)
         val inset = fontSizePx * MathConstants.FRACTION_RULE_INSET
@@ -107,12 +113,14 @@ internal class FractionMeasurer : NodeMeasurer {
             val numeratorX = x + (width - numeratorLayout.width) / 2
             numeratorLayout.draw(this, numeratorX, y + numeratorTop)
 
-            drawLine(
-                color = effectiveContext.color,
-                start = Offset(x + inset, y + lineY + ruleThickness / 2),
-                end = Offset(x + width - inset, y + lineY + ruleThickness / 2),
-                strokeWidth = ruleThickness
-            )
+            if (hasRule) {
+                drawLine(
+                    color = effectiveContext.color,
+                    start = Offset(x + inset, y + lineY + ruleThickness / 2),
+                    end = Offset(x + width - inset, y + lineY + ruleThickness / 2),
+                    strokeWidth = ruleThickness
+                )
+            }
 
             val denominatorX = x + (width - denominatorLayout.width) / 2
             denominatorLayout.draw(this, denominatorX, y + denominatorTop)

@@ -90,6 +90,7 @@ class AccessibilityVisitor : BaseLatexVisitor<String>() {
             LatexNode.Fraction.FractionStyle.DISPLAY -> "display fraction"
             LatexNode.Fraction.FractionStyle.TEXT -> "text fraction"
             LatexNode.Fraction.FractionStyle.CONTINUED -> "continued fraction"
+            LatexNode.Fraction.FractionStyle.RULELESS -> "stacked expression"
             LatexNode.Fraction.FractionStyle.NORMAL -> "fraction"
         }
         return "$prefix: $num over $den"
