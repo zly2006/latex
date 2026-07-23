@@ -227,7 +227,7 @@ sealed class LatexNode {
         override val sourceRange: SourceRange? = null
     ) : LatexNode() {
         enum class FractionStyle {
-            NORMAL, DISPLAY, TEXT, CONTINUED
+            NORMAL, DISPLAY, TEXT, CONTINUED, RULELESS
         }
 
         override fun children() = listOf(numerator, denominator)
@@ -755,6 +755,10 @@ sealed class LatexNode {
         val attributes: Map<String, String> = emptyMap(),
         override val sourceRange: SourceRange? = null
     ) : LatexNode() {
+        companion object {
+            internal const val BBOX_ATTRIBUTE = "\u0000bbox"
+        }
+
         enum class Notation(val mathMlName: String) {
             LONGDIV("longdiv"),
             ACTUARIAL("actuarial"),

@@ -107,6 +107,7 @@ internal fun CommandRegistry.installOperatorHandlers() {
                     is LatexNode.Operator -> arg.op
                     is LatexNode.Symbol -> arg.unicode
                     is LatexNode.Command -> arg.name
+                    is LatexNode.TextMode -> arg.text
                     else -> ""
                 }
                 if (content.isEmpty()) return@register LatexNode.Text("\\mathop")
